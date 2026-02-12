@@ -1,0 +1,84 @@
+# =========================
+# .NET / C#
+# =========================
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]ny [Cc]PU/
+[Ll]og/
+logs/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.rsuser
+
+# Rider / VS / VS Code
+.vs/
+.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# .NET Tools
+.dotnet/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json.example
+
+# Secrets
+secrets.json
+*.pfx
+*.cer
+*.key
+*.pem
+
+# EF Core migrations (OPTIONAL)
+# Nếu bạn muốn commit migrations thì COMMENT 2 dòng dưới lại
+# **/Migrations/
+# **/*Migration*.cs
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Node / Frontend (nếu có)
+# =========================
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Ignore your custom file
+# =========================
+.rules
+**/.rules
