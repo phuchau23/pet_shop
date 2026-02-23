@@ -10,4 +10,5 @@ public class UpdateProductRequest
     public int BrandId { get; set; }
     public bool IsActive { get; set; }
     public List<string>? ImageUrls { get; set; } // Danh sách URL ảnh mới (nếu có sẽ thay thế toàn bộ ảnh cũ)
+    public List<string>? AvailableSizes { get; set; } // Danh sách kích thước có sẵn: ["1kg", "2kg", "5kg", "10kg", "20kg"]
 }

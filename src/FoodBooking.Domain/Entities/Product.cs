@@ -12,6 +12,7 @@ public class Product : BaseEntity
     public int CategoryId { get; set; }
     public int BrandId { get; set; }
     public bool IsActive { get; set; } = true;
+    public List<string> AvailableSizes { get; set; } = new List<string>(); // Các kích thước có sẵn: "1kg", "2kg", "5kg", "10kg", "20kg"
 
     // Navigation properties
     public Category Category { get; set; } = null!;

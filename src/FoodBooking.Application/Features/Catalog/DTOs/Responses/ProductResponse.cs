@@ -12,6 +12,7 @@ public class ProductResponse
     public int BrandId { get; set; }
     public string BrandName { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public List<string> AvailableSizes { get; set; } = new(); // Danh sách kích thước có sẵn
     public List<ProductImageResponse> Images { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

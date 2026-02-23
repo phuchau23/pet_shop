@@ -111,6 +111,7 @@ public class ProductService : IProductService
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
             IsActive = request.IsActive,
+            AvailableSizes = request.AvailableSizes ?? new List<string>(),
             // Tạo ProductImages từ ImageUrls nếu có
             ProductImages = request.ImageUrls?.Select((url, index) => new ProductImage
             {
@@ -156,6 +157,7 @@ public class ProductService : IProductService
         product.CategoryId = request.CategoryId;
         product.BrandId = request.BrandId;
         product.IsActive = request.IsActive;
+        product.AvailableSizes = request.AvailableSizes ?? new List<string>();
         product.UpdatedAt = DateTime.UtcNow;
 
         // Xử lý ProductImages: nếu có ImageUrls mới, thay thế toàn bộ ảnh cũ
@@ -208,6 +210,7 @@ public class ProductService : IProductService
             BrandId = product.BrandId,
             BrandName = product.Brand?.Name ?? string.Empty,
             IsActive = product.IsActive,
+            AvailableSizes = product.AvailableSizes ?? new List<string>(),
             Images = product.ProductImages
                 .OrderBy(pi => pi.SortOrder)
                 .Select(pi => new ProductImageResponse

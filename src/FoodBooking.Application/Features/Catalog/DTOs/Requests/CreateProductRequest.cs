@@ -10,4 +10,5 @@ public class CreateProductRequest
     public int BrandId { get; set; }
     public bool IsActive { get; set; } = true;
     public List<string>? ImageUrls { get; set; } // Danh sách URL ảnh từ Cloudinary (optional)
+    public List<string>? AvailableSizes { get; set; } // Danh sách kích thước có sẵn: ["1kg", "2kg", "5kg", "10kg", "20kg"]
 }
