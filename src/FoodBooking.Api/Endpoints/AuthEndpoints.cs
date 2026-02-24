@@ -118,5 +118,32 @@ public static class AuthEndpoints
         .Produces<ApiResponse<AuthResponse>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces<ApiResponse<AuthResponse>>(StatusCodes.Status400BadRequest);
+
+        // Login with Google ID token
+        group.MapPost("/google-login", async (
+            [FromBody] GoogleLoginRequest request,
+            IAuthService authService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var result = await authService.GoogleLoginAsync(request, cancellationToken);
+                return Results.Ok(ApiResponse<AuthResponse>.Success(result, "Google login successful"));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Results.Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ApiResponse<AuthResponse>.Error(400, ex.Message));
+            }
+        })
+        .WithName("GoogleLogin")
+        .WithSummary("Login with Google")
+        .WithDescription("Authenticate user with Google ID token and receive JWT token")
+        .Produces<ApiResponse<AuthResponse>>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces<ApiResponse<AuthResponse>>(StatusCodes.Status400BadRequest);
     }
 }
