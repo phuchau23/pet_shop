@@ -26,6 +26,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .FirstOrDefaultAsync(p => p.ProductId == id, cancellationToken);
     }
 
@@ -35,6 +36,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .Where(p => p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
@@ -46,6 +48,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .Where(p => p.IsActive)
             .AsQueryable();
 
@@ -79,6 +82,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .Where(p => p.CategoryId == categoryId && p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
@@ -90,6 +94,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .Where(p => p.CategoryId == categoryId && p.IsActive)
             .AsQueryable();
 
@@ -122,6 +127,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .Where(p => p.BrandId == brandId && p.IsActive)
             .OrderBy(p => p.Name)
             .ToListAsync(cancellationToken);
@@ -133,6 +139,7 @@ public class ProductRepository : IProductRepository
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.ProductImages)
+            .Include(p => p.ProductSizes)
             .Where(p => p.BrandId == brandId && p.IsActive)
             .AsQueryable();
 

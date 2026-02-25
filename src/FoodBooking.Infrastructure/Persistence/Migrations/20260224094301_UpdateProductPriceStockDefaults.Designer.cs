@@ -3,6 +3,7 @@ using System;
 using FoodBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FoodBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260224094301_UpdateProductPriceStockDefaults")]
+    partial class UpdateProductPriceStockDefaults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,207 +89,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("categories", (string)null);
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.District", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Code")
-                        .HasColumnType("integer")
-                        .HasColumnName("code");
-
-                    b.Property<string>("Codename")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("codename");
-
-                    b.Property<string>("DivisionType")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("division_type");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.Property<int>("ProvinceCode")
-                        .HasColumnType("integer")
-                        .HasColumnName("province_code");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("ProvinceCode");
-
-                    b.ToTable("districts", (string)null);
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AddressDetail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("address_detail");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<double?>("CustomerLat")
-                        .HasColumnType("double precision")
-                        .HasColumnName("customer_lat");
-
-                    b.Property<double?>("CustomerLng")
-                        .HasColumnType("double precision")
-                        .HasColumnName("customer_lng");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("customer_name");
-
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("customer_phone");
-
-                    b.Property<int?>("DistrictCode")
-                        .HasColumnType("integer")
-                        .HasColumnName("district_code");
-
-                    b.Property<string>("FullAddress")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("full_address");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text")
-                        .HasColumnName("note");
-
-                    b.Property<int?>("ProvinceCode")
-                        .HasColumnType("integer")
-                        .HasColumnName("province_code");
-
-                    b.Property<int?>("ShipperId")
-                        .HasColumnType("integer")
-                        .HasColumnName("shipper_id");
-
-                    b.Property<double>("ShopLat")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("double precision")
-                        .HasDefaultValue(10.8506)
-                        .HasColumnName("shop_lat");
-
-                    b.Property<double>("ShopLng")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("double precision")
-                        .HasDefaultValue(106.7749)
-                        .HasColumnName("shop_lng");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasDefaultValue("pending")
-                        .HasColumnName("status");
-
-                    b.Property<decimal?>("TotalPrice")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("total_price");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int?>("WardCode")
-                        .HasColumnType("integer")
-                        .HasColumnName("ward_code");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("CustomerPhone");
-
-                    b.HasIndex("DistrictCode");
-
-                    b.HasIndex("ProvinceCode");
-
-                    b.HasIndex("ShipperId");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("WardCode");
-
-                    b.ToTable("orders", (string)null);
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.OrderItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_id");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer")
-                        .HasColumnName("product_id");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("product_name");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
-
-                    b.Property<decimal>("Subtotal")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("subtotal");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("unit_price");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("order_items", (string)null);
                 });
 
             modelBuilder.Entity("FoodBooking.Domain.Entities.OtpVerification", b =>
@@ -469,55 +271,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("product_sizes", (string)null);
                 });
 
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Province", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Code")
-                        .HasColumnType("integer")
-                        .HasColumnName("code");
-
-                    b.Property<string>("Codename")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("codename");
-
-                    b.Property<string>("DivisionType")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("division_type");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("double precision")
-                        .HasColumnName("latitude");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("double precision")
-                        .HasColumnName("longitude");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.Property<int?>("PhoneCode")
-                        .HasColumnType("integer")
-                        .HasColumnName("phone_code");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("provinces", (string)null);
-                });
-
             modelBuilder.Entity("FoodBooking.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -576,93 +329,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Ward", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Code")
-                        .HasColumnType("integer")
-                        .HasColumnName("code");
-
-                    b.Property<string>("Codename")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("codename");
-
-                    b.Property<int>("DistrictCode")
-                        .HasColumnType("integer")
-                        .HasColumnName("district_code");
-
-                    b.Property<string>("DivisionType")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("division_type");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("DistrictCode");
-
-                    b.ToTable("wards", (string)null);
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.District", b =>
-                {
-                    b.HasOne("FoodBooking.Domain.Entities.Province", "Province")
-                        .WithMany("Districts")
-                        .HasForeignKey("ProvinceCode")
-                        .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Province");
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Order", b =>
-                {
-                    b.HasOne("FoodBooking.Domain.Entities.District", null)
-                        .WithMany()
-                        .HasForeignKey("DistrictCode")
-                        .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("FoodBooking.Domain.Entities.Province", null)
-                        .WithMany()
-                        .HasForeignKey("ProvinceCode")
-                        .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("FoodBooking.Domain.Entities.Ward", null)
-                        .WithMany()
-                        .HasForeignKey("WardCode")
-                        .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.SetNull);
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.OrderItem", b =>
-                {
-                    b.HasOne("FoodBooking.Domain.Entities.Order", "Order")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("FoodBooking.Domain.Entities.Product", b =>
                 {
                     b.HasOne("FoodBooking.Domain.Entities.Brand", "Brand")
@@ -704,18 +370,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Ward", b =>
-                {
-                    b.HasOne("FoodBooking.Domain.Entities.District", "District")
-                        .WithMany("Wards")
-                        .HasForeignKey("DistrictCode")
-                        .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("District");
-                });
-
             modelBuilder.Entity("FoodBooking.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
@@ -726,26 +380,11 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("FoodBooking.Domain.Entities.District", b =>
-                {
-                    b.Navigation("Wards");
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Order", b =>
-                {
-                    b.Navigation("OrderItems");
-                });
-
             modelBuilder.Entity("FoodBooking.Domain.Entities.Product", b =>
                 {
                     b.Navigation("ProductImages");
 
                     b.Navigation("ProductSizes");
-                });
-
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Province", b =>
-                {
-                    b.Navigation("Districts");
                 });
 #pragma warning restore 612, 618
         }

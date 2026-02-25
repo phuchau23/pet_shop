@@ -106,19 +106,26 @@ public class ProductService : IProductService
         {
             Name = request.Name,
             Description = request.Description,
-            Price = request.Price,
-            StockQuantity = request.StockQuantity,
+            Price = 0, // Sẽ tính từ ProductSizes
+            StockQuantity = 0, // Sẽ tính từ ProductSizes
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
             IsActive = request.IsActive,
-            AvailableSizes = request.AvailableSizes ?? new List<string>(),
             // Tạo ProductImages từ ImageUrls nếu có
             ProductImages = request.ImageUrls?.Select((url, index) => new ProductImage
             {
                 ImageUrl = url,
                 IsPrimary = index == 0, // Ảnh đầu tiên là primary
                 SortOrder = index + 1
-            }).ToList() ?? new List<ProductImage>()
+            }).ToList() ?? new List<ProductImage>(),
+            // Tạo ProductSizes từ request nếu có
+            ProductSizes = request.ProductSizes?.Select(ps => new ProductSize
+            {
+                Size = ps.Size,
+                Price = ps.Price,
+                StockQuantity = ps.StockQuantity,
+                IsActive = ps.IsActive
+            }).ToList() ?? new List<ProductSize>()
         };
 
         var created = await _productRepository.CreateAsync(product, cancellationToken);
@@ -152,12 +159,10 @@ public class ProductService : IProductService
 
         product.Name = request.Name;
         product.Description = request.Description;
-        product.Price = request.Price;
-        product.StockQuantity = request.StockQuantity;
+        // Price và StockQuantity sẽ tính từ ProductSizes
         product.CategoryId = request.CategoryId;
         product.BrandId = request.BrandId;
         product.IsActive = request.IsActive;
-        product.AvailableSizes = request.AvailableSizes ?? new List<string>();
         product.UpdatedAt = DateTime.UtcNow;
 
         // Xử lý ProductImages: nếu có ImageUrls mới, thay thế toàn bộ ảnh cũ
@@ -174,6 +179,25 @@ public class ProductService : IProductService
                     ImageUrl = url,
                     IsPrimary = index == 0,
                     SortOrder = index + 1
+                });
+            }
+        }
+
+        // Xử lý ProductSizes: nếu có ProductSizes mới, thay thế toàn bộ size cũ
+        if (request.ProductSizes != null)
+        {
+            // Xóa size cũ
+            product.ProductSizes.Clear();
+            
+            // Thêm size mới
+            foreach (var psRequest in request.ProductSizes)
+            {
+                product.ProductSizes.Add(new ProductSize
+                {
+                    Size = psRequest.Size,
+                    Price = psRequest.Price,
+                    StockQuantity = psRequest.StockQuantity,
+                    IsActive = psRequest.IsActive
                 });
             }
         }
@@ -198,19 +222,40 @@ public class ProductService : IProductService
 
     private static ProductResponse MapToResponse(Product product)
     {
+        var activeSizes = product.ProductSizes
+            .Where(ps => ps.IsActive)
+            .ToList();
+
+        // Tính giá rẻ nhất từ các ProductSizes
+        var minPrice = activeSizes.Any() 
+            ? activeSizes.Min(ps => ps.Price) 
+            : 0;
+
+        // Tính tổng tồn kho từ các ProductSizes
+        var totalStock = activeSizes.Sum(ps => ps.StockQuantity);
+
         return new ProductResponse
         {
             ProductId = product.ProductId,
             Name = product.Name,
             Description = product.Description,
-            Price = product.Price,
-            StockQuantity = product.StockQuantity,
+            Price = minPrice, // Giá rẻ nhất từ ProductSizes
+            StockQuantity = totalStock, // Tổng tồn kho từ ProductSizes
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name ?? string.Empty,
             BrandId = product.BrandId,
             BrandName = product.Brand?.Name ?? string.Empty,
             IsActive = product.IsActive,
-            AvailableSizes = product.AvailableSizes ?? new List<string>(),
+            ProductSizes = product.ProductSizes
+                .Select(ps => new ProductSizeResponse
+                {
+                    ProductSizeId = ps.ProductSizeId,
+                    Size = ps.Size,
+                    Price = ps.Price,
+                    StockQuantity = ps.StockQuantity,
+                    IsActive = ps.IsActive
+                })
+                .ToList(),
             Images = product.ProductImages
                 .OrderBy(pi => pi.SortOrder)
                 .Select(pi => new ProductImageResponse
