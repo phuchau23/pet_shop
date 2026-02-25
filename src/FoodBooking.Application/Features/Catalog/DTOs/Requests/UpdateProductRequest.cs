@@ -4,11 +4,10 @@ public class UpdateProductRequest
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public decimal Price { get; set; }
-    public int StockQuantity { get; set; }
+    // Price và StockQuantity sẽ tính từ ProductSizes
     public int CategoryId { get; set; }
     public int BrandId { get; set; }
     public bool IsActive { get; set; }
     public List<string>? ImageUrls { get; set; } // Danh sách URL ảnh mới (nếu có sẽ thay thế toàn bộ ảnh cũ)
-    public List<string>? AvailableSizes { get; set; } // Danh sách kích thước có sẵn: ["1kg", "2kg", "5kg", "10kg", "20kg"]
+    public List<ProductSizeRequest>? ProductSizes { get; set; } // Danh sách các size với giá và tồn kho riêng (nếu có sẽ thay thế toàn bộ size cũ)
 }

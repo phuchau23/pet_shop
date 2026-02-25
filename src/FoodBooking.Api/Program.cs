@@ -16,6 +16,9 @@ using FoodBooking.Api.Endpoints;
 using FoodBooking.Application.Abstractions.Auth;
 using FoodBooking.Application.Features.Auth.DTOs.Validators;
 using FoodBooking.Application.Features.Catalog.Services;
+using FoodBooking.Application.Features.Locations.Services;
+using FoodBooking.Application.Features.Orders.Services;
+using FoodBooking.Infrastructure.Persistence.SeedData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +38,8 @@ builder.Services.AddScoped<IOtpRepository, OtpRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 // Configure Cloudinary
 builder.Services.Configure<CloudinarySettings>(
@@ -48,6 +53,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+// Register Seed Service
+builder.Services.AddScoped<LocationSeedService>();
 
 // Configure ProblemDetails for better error responses
 builder.Services.AddProblemDetails();
@@ -146,6 +156,13 @@ if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("AUTO_
         dbContext.Database.Migrate();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogInformation("Database migration completed successfully.");
+
+        // Auto-seed location data if enabled and not exists
+        if (Environment.GetEnvironmentVariable("AUTO_SEED_LOCATIONS") == "true")
+        {
+            var seedService = scope.ServiceProvider.GetRequiredService<LocationSeedService>();
+            await seedService.SeedLocationsAsync();
+        }
     }
     catch (Exception ex)
     {
@@ -178,6 +195,9 @@ app.MapCategoryEndpoints();
 app.MapBrandEndpoints();
 app.MapProductEndpoints();
 app.MapImageEndpoints();
+app.MapLocationEndpoints();
+app.MapSeedEndpoints();
+app.MapOrderEndpoints();
 
 // Health check endpoint
 app.MapGet("/", () => "FoodBooking API is running!");

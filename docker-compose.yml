@@ -28,6 +28,7 @@ services:
       - "5001:8081"
     environment:
       - AUTO_MIGRATE=true
+      - AUTO_SEED_LOCATIONS=true
       - ENABLE_SWAGGER=true
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
