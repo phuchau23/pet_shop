@@ -1,7 +1,10 @@
 using FoodBooking.Application.Abstractions;
 using FoodBooking.Application.Common;
 using FoodBooking.Application.Features.Auth.DTOs;
+using FoodBooking.Application.Features.Auth.DTOs.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FoodBooking.Api.Endpoints;
 
@@ -118,5 +121,41 @@ public static class AuthEndpoints
         .Produces<ApiResponse<AuthResponse>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces<ApiResponse<AuthResponse>>(StatusCodes.Status400BadRequest);
+
+        // GET /auth/profile - Lấy thông tin profile của user hiện tại
+        group.MapGet("/profile", [Authorize] async (
+            ClaimsPrincipal user,
+            IAuthService authService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                    ?? user.FindFirst("UserId")?.Value;
+                
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await authService.GetProfileAsync(userId, cancellationToken);
+                return Results.Ok(ApiResponse<ProfileResponse>.Success(result, "Profile retrieved successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<ProfileResponse>.Error(404, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ApiResponse<ProfileResponse>.Error(400, ex.Message));
+            }
+        })
+        .WithName("GetProfile")
+        .WithSummary("Get current user profile")
+        .WithDescription("Get profile information of the authenticated user")
+        .Produces<ApiResponse<ProfileResponse>>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces<ApiResponse<ProfileResponse>>(StatusCodes.Status404NotFound)
+        .Produces<ApiResponse<ProfileResponse>>(StatusCodes.Status400BadRequest);
     }
 }

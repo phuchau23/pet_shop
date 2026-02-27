@@ -18,6 +18,7 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Payment)
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }
 
@@ -25,13 +26,24 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Payment)
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Orders
+            .Include(o => o.OrderItems)
+            .Include(o => o.Payment)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Order>> GetByCustomerPhoneAsync(string customerPhone, CancellationToken cancellationToken = default)
     {
         return await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Payment)
             .Where(o => o.CustomerPhone == customerPhone)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -41,6 +53,7 @@ public class OrderRepository : IOrderRepository
     {
         var query = _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Payment)
             .AsQueryable();
 
         if (shipperId.HasValue)
