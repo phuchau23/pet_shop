@@ -1,5 +1,7 @@
 using FoodBooking.Application.Abstractions;
+using FoodBooking.Application.Abstractions.Auth;
 using FoodBooking.Application.Features.Auth.DTOs;
+using FoodBooking.Application.Features.Auth.DTOs.Responses;
 using FoodBooking.Domain.Entities;
 using FoodBooking.Domain.Enums;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +20,7 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IOtpRepository _otpRepository;
     private readonly IEmailService _emailService;
+    private readonly IGoogleTokenVerifier _googleTokenVerifier;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthService> _logger;
 
@@ -25,12 +28,14 @@ public class AuthService : IAuthService
         IUserRepository userRepository,
         IOtpRepository otpRepository,
         IEmailService emailService,
+        IGoogleTokenVerifier googleTokenVerifier,
         IConfiguration configuration,
         ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
         _otpRepository = otpRepository;
         _emailService = emailService;
+        _googleTokenVerifier = googleTokenVerifier;
         _configuration = configuration;
         _logger = logger;
     }
@@ -100,6 +105,75 @@ public class AuthService : IAuthService
         // Update last login
         user.LastLogin = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user, cancellationToken);
+
+        var token = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        return new AuthResponse
+        {
+            Token = token,
+            RefreshToken = refreshToken,
+            ExpiresAt = DateTime.UtcNow.AddHours(24),
+            User = new UserInfo
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                FullName = user.FullName,
+                UserRole = user.UserRole.ToString()
+            }
+        };
+    }
+
+    public async Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request, CancellationToken cancellationToken = default)
+    {
+        var payload = await _googleTokenVerifier.VerifyIdTokenAsync(request.IdToken, cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(payload.Email))
+        {
+            throw new UnauthorizedAccessException("Google account email is missing");
+        }
+
+        if (!payload.EmailVerified)
+        {
+            throw new UnauthorizedAccessException("Google email is not verified");
+        }
+
+        var user = await _userRepository.GetByEmailAsync(payload.Email, cancellationToken);
+
+        if (user == null)
+        {
+            user = new User
+            {
+                Email = payload.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                FullName = payload.Name,
+                UserRole = UserRole.Customer,
+                AccountStatus = AccountStatus.Active,
+                LastLogin = DateTime.UtcNow
+            };
+
+            user = await _userRepository.CreateAsync(user, cancellationToken);
+        }
+        else
+        {
+            if (user.AccountStatus == AccountStatus.Banned)
+            {
+                throw new UnauthorizedAccessException("Account is banned");
+            }
+
+            if (user.AccountStatus == AccountStatus.Inactive)
+            {
+                user.AccountStatus = AccountStatus.Active;
+            }
+
+            if (string.IsNullOrWhiteSpace(user.FullName) && !string.IsNullOrWhiteSpace(payload.Name))
+            {
+                user.FullName = payload.Name;
+            }
+
+            user.LastLogin = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user, cancellationToken);
+        }
 
         var token = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
@@ -218,6 +292,28 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<ProfileResponse> GetProfileAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with id {userId} not found");
+        }
+
+        return new ProfileResponse
+        {
+            UserId = user.UserId,
+            Email = user.Email,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            UserRole = user.UserRole.ToString(),
+            AccountStatus = user.AccountStatus.ToString(),
+            LastLogin = user.LastLogin,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
     }
 
     private string GenerateRefreshToken()

@@ -11,11 +11,7 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             .NotEmpty().WithMessage("Product name is required")
             .MaximumLength(200).WithMessage("Product name must not exceed 200 characters");
 
-        RuleFor(x => x.Price)
-            .GreaterThan(0).WithMessage("Price must be greater than 0");
-
-        RuleFor(x => x.StockQuantity)
-            .GreaterThanOrEqualTo(0).WithMessage("Stock quantity must be greater than or equal to 0");
+        // Price và StockQuantity sẽ tính từ ProductSizes, không cần validate ở đây
 
         RuleFor(x => x.CategoryId)
             .GreaterThan(0).WithMessage("Category is required");
@@ -29,5 +25,24 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _))
             .WithMessage("Image URL must be a valid URL")
             .When(x => x.ImageUrls != null && x.ImageUrls.Any());
+
+        // Validate ProductSizes - bắt buộc phải có ít nhất 1 size
+        RuleFor(x => x.ProductSizes)
+            .NotNull().WithMessage("ProductSizes is required")
+            .NotEmpty().WithMessage("Product must have at least one size");
+
+        RuleForEach(x => x.ProductSizes)
+            .ChildRules(ps =>
+            {
+                ps.RuleFor(s => s.Size)
+                    .NotEmpty().WithMessage("Size is required")
+                    .MaximumLength(50).WithMessage("Size must not exceed 50 characters");
+
+                ps.RuleFor(s => s.Price)
+                    .GreaterThan(0).WithMessage("Price for each size must be greater than 0");
+
+                ps.RuleFor(s => s.StockQuantity)
+                    .GreaterThanOrEqualTo(0).WithMessage("Stock quantity for each size must be greater than or equal to 0");
+            });
     }
 }

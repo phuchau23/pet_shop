@@ -88,6 +88,248 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
+            modelBuilder.Entity("FoodBooking.Domain.Entities.District", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Codename")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("codename");
+
+                    b.Property<string>("DivisionType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("division_type");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("ProvinceCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("province_code");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("ProvinceCode");
+
+                    b.ToTable("districts", (string)null);
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AddressDetail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("address_detail");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<double?>("CustomerLat")
+                        .HasColumnType("double precision")
+                        .HasColumnName("customer_lat");
+
+                    b.Property<double?>("CustomerLng")
+                        .HasColumnType("double precision")
+                        .HasColumnName("customer_lng");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<int?>("DistrictCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("district_code");
+
+                    b.Property<int?>("EstimatedDeliveryMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("estimated_delivery_minutes");
+
+                    b.Property<double?>("EstimatedDistanceMeters")
+                        .HasColumnType("double precision")
+                        .HasColumnName("estimated_distance_meters");
+
+                    b.Property<decimal?>("FinalAmount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("final_amount");
+
+                    b.Property<string>("FullAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("full_address");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_id");
+
+                    b.Property<int?>("ProvinceCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("province_code");
+
+                    b.Property<int?>("ShipperId")
+                        .HasColumnType("integer")
+                        .HasColumnName("shipper_id");
+
+                    b.Property<double>("ShopLat")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(10.841449000000001)
+                        .HasColumnName("shop_lat");
+
+                    b.Property<double>("ShopLng")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(106.809997)
+                        .HasColumnName("shop_lng");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("pending")
+                        .HasColumnName("status");
+
+                    b.Property<decimal?>("TotalPrice")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("total_price");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("VoucherCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("voucher_code");
+
+                    b.Property<decimal?>("VoucherDiscount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("voucher_discount");
+
+                    b.Property<int?>("VoucherId")
+                        .HasColumnType("integer")
+                        .HasColumnName("voucher_id");
+
+                    b.Property<int?>("VoucherId1")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("WardCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("ward_code");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CustomerPhone");
+
+                    b.HasIndex("DistrictCode");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
+
+                    b.HasIndex("ProvinceCode");
+
+                    b.HasIndex("ShipperId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("VoucherId");
+
+                    b.HasIndex("VoucherId1");
+
+                    b.HasIndex("WardCode");
+
+                    b.ToTable("orders", (string)null);
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("order_id");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("product_name");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("subtotal");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("unit_price");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("order_items", (string)null);
+                });
+
             modelBuilder.Entity("FoodBooking.Domain.Entities.OtpVerification", b =>
                 {
                     b.Property<int>("OtpVerificationId")
@@ -128,6 +370,67 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("otp_verifications", (string)null);
                 });
 
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("order_id");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("PaymentMetadata")
+                        .HasColumnType("text")
+                        .HasColumnName("payment_metadata");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_method");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("status");
+
+                    b.Property<string>("TransactionRef")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("transaction_ref");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("payments", (string)null);
+                });
+
             modelBuilder.Entity("FoodBooking.Domain.Entities.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -164,12 +467,16 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                         .HasColumnName("name");
 
                     b.Property<decimal>("Price")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
+                        .HasDefaultValue(0m)
                         .HasColumnName("price");
 
                     b.Property<int>("StockQuantity")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasDefaultValue(0)
                         .HasColumnName("stock_quantity");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -218,6 +525,99 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("product_images", (string)null);
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.ProductSize", b =>
+                {
+                    b.Property<int>("ProductSizeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("product_size_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductSizeId"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("price");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("size");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("stock_quantity");
+
+                    b.HasKey("ProductSizeId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "Size")
+                        .IsUnique();
+
+                    b.ToTable("product_sizes", (string)null);
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Codename")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("codename");
+
+                    b.Property<string>("DivisionType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("division_type");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int?>("PhoneCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("phone_code");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("provinces", (string)null);
                 });
 
             modelBuilder.Entity("FoodBooking.Domain.Entities.User", b =>
@@ -278,6 +678,212 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Voucher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("DiscountType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("percentage")
+                        .HasColumnName("discount_type");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("discount_value");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_date");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal?>("MaxDiscountAmount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("max_discount_amount");
+
+                    b.Property<decimal?>("MinOrderAmount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("min_order_amount");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_date");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int?>("UsageLimit")
+                        .HasColumnType("integer")
+                        .HasColumnName("usage_limit");
+
+                    b.Property<int>("UsedCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("used_count");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("EndDate");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("StartDate");
+
+                    b.ToTable("vouchers", (string)null);
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Ward", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Codename")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("codename");
+
+                    b.Property<int>("DistrictCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("district_code");
+
+                    b.Property<string>("DivisionType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("division_type");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("DistrictCode");
+
+                    b.ToTable("wards", (string)null);
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.District", b =>
+                {
+                    b.HasOne("FoodBooking.Domain.Entities.Province", "Province")
+                        .WithMany("Districts")
+                        .HasForeignKey("ProvinceCode")
+                        .HasPrincipalKey("Code")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Province");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Order", b =>
+                {
+                    b.HasOne("FoodBooking.Domain.Entities.District", null)
+                        .WithMany()
+                        .HasForeignKey("DistrictCode")
+                        .HasPrincipalKey("Code")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FoodBooking.Domain.Entities.Payment", null)
+                        .WithOne("Order")
+                        .HasForeignKey("FoodBooking.Domain.Entities.Order", "PaymentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FoodBooking.Domain.Entities.Province", null)
+                        .WithMany()
+                        .HasForeignKey("ProvinceCode")
+                        .HasPrincipalKey("Code")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FoodBooking.Domain.Entities.Voucher", null)
+                        .WithMany()
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FoodBooking.Domain.Entities.Voucher", "Voucher")
+                        .WithMany()
+                        .HasForeignKey("VoucherId1");
+
+                    b.HasOne("FoodBooking.Domain.Entities.Ward", null)
+                        .WithMany()
+                        .HasForeignKey("WardCode")
+                        .HasPrincipalKey("Code")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Voucher");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.OrderItem", b =>
+                {
+                    b.HasOne("FoodBooking.Domain.Entities.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("FoodBooking.Domain.Entities.Order", null)
+                        .WithOne("Payment")
+                        .HasForeignKey("FoodBooking.Domain.Entities.Payment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FoodBooking.Domain.Entities.Product", b =>
                 {
                     b.HasOne("FoodBooking.Domain.Entities.Brand", "Brand")
@@ -308,6 +914,29 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("FoodBooking.Domain.Entities.ProductSize", b =>
+                {
+                    b.HasOne("FoodBooking.Domain.Entities.Product", "Product")
+                        .WithMany("ProductSizes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Ward", b =>
+                {
+                    b.HasOne("FoodBooking.Domain.Entities.District", "District")
+                        .WithMany("Wards")
+                        .HasForeignKey("DistrictCode")
+                        .HasPrincipalKey("Code")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("District");
+                });
+
             modelBuilder.Entity("FoodBooking.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
@@ -318,9 +947,33 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("FoodBooking.Domain.Entities.District", b =>
+                {
+                    b.Navigation("Wards");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Order", b =>
+                {
+                    b.Navigation("OrderItems");
+
+                    b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Payment", b =>
+                {
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("FoodBooking.Domain.Entities.Product", b =>
                 {
                     b.Navigation("ProductImages");
+
+                    b.Navigation("ProductSizes");
+                });
+
+            modelBuilder.Entity("FoodBooking.Domain.Entities.Province", b =>
+                {
+                    b.Navigation("Districts");
                 });
 #pragma warning restore 612, 618
         }

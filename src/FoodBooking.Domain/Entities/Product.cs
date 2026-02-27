@@ -17,6 +17,7 @@ public class Product : BaseEntity
     public Category Category { get; set; } = null!;
     public Brand Brand { get; set; } = null!;
     public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+    public ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
     // Phase B: OrderItems
     // Phase C: Reviews
 }

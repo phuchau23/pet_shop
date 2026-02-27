@@ -12,9 +12,19 @@ public class ProductResponse
     public int BrandId { get; set; }
     public string BrandName { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public List<ProductSizeResponse> ProductSizes { get; set; } = new(); // Danh sách các size với giá và tồn kho riêng
     public List<ProductImageResponse> Images { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+}
+
+public class ProductSizeResponse
+{
+    public int ProductSizeId { get; set; }
+    public string Size { get; set; } = string.Empty; // "1kg", "2kg", "5kg", etc.
+    public decimal Price { get; set; } // Giá riêng cho size này
+    public int StockQuantity { get; set; } // Số lượng tồn kho riêng cho size này
+    public bool IsActive { get; set; }
 }
 
 public class ProductImageResponse

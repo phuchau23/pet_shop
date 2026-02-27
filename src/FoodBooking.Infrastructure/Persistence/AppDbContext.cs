@@ -15,11 +15,27 @@ public class AppDbContext : DbContext
     public DbSet<Brand> Brands { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductImage> ProductImages { get; set; }
+    public DbSet<ProductSize> ProductSizes { get; set; }
 
     // Authentication
     public DbSet<OtpVerification> OtpVerifications { get; set; }
 
-    // Phase B: Orders, Addresses, Vouchers, Payments
+    // Locations
+    public DbSet<Province> Provinces { get; set; }
+    public DbSet<District> Districts { get; set; }
+    public DbSet<Ward> Wards { get; set; }
+
+    // Orders
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    
+    // Payments
+    public DbSet<Payment> Payments { get; set; }
+    
+    // Vouchers
+    public DbSet<Voucher> Vouchers { get; set; }
+
+    // Phase B: Addresses, Vouchers, Payments
     // Phase C: Shippers, Shippings, Reviews
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

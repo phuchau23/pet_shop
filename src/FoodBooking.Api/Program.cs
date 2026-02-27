@@ -10,10 +10,18 @@ using FoodBooking.Application.Abstractions;
 using FoodBooking.Application.Features.Auth.Services;
 using FoodBooking.Infrastructure.External.Email;
 using FoodBooking.Infrastructure.External.Cloudinary;
+using FoodBooking.Infrastructure.External.Google;
 using FoodBooking.Infrastructure.Repositories;
 using FoodBooking.Api.Endpoints;
+using FoodBooking.Application.Abstractions.Auth;
 using FoodBooking.Application.Features.Auth.DTOs.Validators;
 using FoodBooking.Application.Features.Catalog.Services;
+using FoodBooking.Application.Features.Locations.Services;
+using FoodBooking.Application.Features.Orders.Services;
+using FoodBooking.Infrastructure.Persistence.SeedData;
+using FoodBooking.Infrastructure.External.Routing;
+using FoodBooking.Application.Features.Payments.Services;
+using FoodBooking.Application.Features.Vouchers.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +41,10 @@ builder.Services.AddScoped<IOtpRepository, OtpRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
 // Configure Cloudinary
 builder.Services.Configure<CloudinarySettings>(
@@ -41,10 +53,23 @@ builder.Services.Configure<CloudinarySettings>(
 // Register Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IImageService, CloudinaryImageService>();
+builder.Services.AddScoped<IGoogleTokenVerifier, GoogleTokenVerifier>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+
+// Register OSRM Routing Service
+builder.Services.AddHttpClient<IRoutingService, OSRMRoutingService>();
+
+// Register Services
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
+
+// Register Seed Service
+builder.Services.AddScoped<LocationSeedService>();
 
 // Configure ProblemDetails for better error responses
 builder.Services.AddProblemDetails();
@@ -143,6 +168,13 @@ if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("AUTO_
         dbContext.Database.Migrate();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogInformation("Database migration completed successfully.");
+
+        // Auto-seed location data if enabled and not exists
+        if (Environment.GetEnvironmentVariable("AUTO_SEED_LOCATIONS") == "true")
+        {
+            var seedService = scope.ServiceProvider.GetRequiredService<LocationSeedService>();
+            await seedService.SeedLocationsAsync();
+        }
     }
     catch (Exception ex)
     {
@@ -175,6 +207,11 @@ app.MapCategoryEndpoints();
 app.MapBrandEndpoints();
 app.MapProductEndpoints();
 app.MapImageEndpoints();
+app.MapLocationEndpoints();
+app.MapSeedEndpoints();
+app.MapOrderEndpoints();
+app.MapPaymentEndpoints();
+app.MapVoucherEndpoints();
 
 // Health check endpoint
 app.MapGet("/", () => "FoodBooking API is running!");

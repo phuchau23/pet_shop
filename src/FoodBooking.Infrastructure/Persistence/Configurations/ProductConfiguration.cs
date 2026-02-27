@@ -28,11 +28,13 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Price)
             .HasColumnName("price")
             .HasPrecision(18, 2)
-            .IsRequired();
+            .IsRequired()
+            .HasDefaultValue(0); // Giá sẽ tính từ ProductSizes (giá rẻ nhất)
 
         builder.Property(p => p.StockQuantity)
             .HasColumnName("stock_quantity")
-            .IsRequired();
+            .IsRequired()
+            .HasDefaultValue(0); // Tồn kho sẽ tính từ ProductSizes (tổng tồn kho)
 
         builder.Property(p => p.CategoryId)
             .HasColumnName("category_id")
