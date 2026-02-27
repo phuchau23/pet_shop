@@ -1,6 +1,7 @@
 using FoodBooking.Application.Abstractions;
 using FoodBooking.Application.Abstractions.Auth;
 using FoodBooking.Application.Features.Auth.DTOs;
+using FoodBooking.Application.Features.Auth.DTOs.Responses;
 using FoodBooking.Domain.Entities;
 using FoodBooking.Domain.Enums;
 using Microsoft.Extensions.Configuration;
@@ -291,6 +292,28 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<ProfileResponse> GetProfileAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with id {userId} not found");
+        }
+
+        return new ProfileResponse
+        {
+            UserId = user.UserId,
+            Email = user.Email,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            UserRole = user.UserRole.ToString(),
+            AccountStatus = user.AccountStatus.ToString(),
+            LastLogin = user.LastLogin,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
     }
 
     private string GenerateRefreshToken()

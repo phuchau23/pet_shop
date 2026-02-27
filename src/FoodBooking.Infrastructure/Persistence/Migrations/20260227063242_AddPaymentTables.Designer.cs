@@ -3,6 +3,7 @@ using System;
 using FoodBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FoodBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260227063242_AddPaymentTables")]
+    partial class AddPaymentTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -182,11 +185,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("estimated_distance_meters");
 
-                    b.Property<decimal?>("FinalAmount")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("final_amount");
-
                     b.Property<string>("FullAddress")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
@@ -237,23 +235,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("VoucherCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("voucher_code");
-
-                    b.Property<decimal?>("VoucherDiscount")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("voucher_discount");
-
-                    b.Property<int?>("VoucherId")
-                        .HasColumnType("integer")
-                        .HasColumnName("voucher_id");
-
-                    b.Property<int?>("VoucherId1")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("WardCode")
                         .HasColumnType("integer")
                         .HasColumnName("ward_code");
@@ -274,10 +255,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.HasIndex("ShipperId");
 
                     b.HasIndex("Status");
-
-                    b.HasIndex("VoucherId");
-
-                    b.HasIndex("VoucherId1");
 
                     b.HasIndex("WardCode");
 
@@ -388,6 +365,26 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("MoMoDeepLink")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("momo_deep_link");
+
+                    b.Property<string>("MoMoOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("momo_order_id");
+
+                    b.Property<string>("MoMoQrCodeUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("momo_qr_code_url");
+
+                    b.Property<string>("MoMoRequestId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("momo_request_id");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
@@ -395,10 +392,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("paid_at");
-
-                    b.Property<string>("PaymentMetadata")
-                        .HasColumnType("text")
-                        .HasColumnName("payment_metadata");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("integer")
@@ -678,100 +671,6 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("FoodBooking.Domain.Entities.Voucher", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("code");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("DiscountType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValue("percentage")
-                        .HasColumnName("discount_type");
-
-                    b.Property<decimal>("DiscountValue")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("discount_value");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_date");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<decimal?>("MaxDiscountAmount")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("max_discount_amount");
-
-                    b.Property<decimal?>("MinOrderAmount")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("numeric(12,2)")
-                        .HasColumnName("min_order_amount");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_date");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int?>("UsageLimit")
-                        .HasColumnType("integer")
-                        .HasColumnName("usage_limit");
-
-                    b.Property<int>("UsedCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("used_count");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("EndDate");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("StartDate");
-
-                    b.ToTable("vouchers", (string)null);
-                });
-
             modelBuilder.Entity("FoodBooking.Domain.Entities.Ward", b =>
                 {
                     b.Property<int>("Id")
@@ -846,22 +745,11 @@ namespace FoodBooking.Infrastructure.Persistence.Migrations
                         .HasPrincipalKey("Code")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("FoodBooking.Domain.Entities.Voucher", null)
-                        .WithMany()
-                        .HasForeignKey("VoucherId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("FoodBooking.Domain.Entities.Voucher", "Voucher")
-                        .WithMany()
-                        .HasForeignKey("VoucherId1");
-
                     b.HasOne("FoodBooking.Domain.Entities.Ward", null)
                         .WithMany()
                         .HasForeignKey("WardCode")
                         .HasPrincipalKey("Code")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("FoodBooking.Domain.Entities.OrderItem", b =>

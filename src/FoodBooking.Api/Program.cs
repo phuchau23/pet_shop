@@ -19,6 +19,9 @@ using FoodBooking.Application.Features.Catalog.Services;
 using FoodBooking.Application.Features.Locations.Services;
 using FoodBooking.Application.Features.Orders.Services;
 using FoodBooking.Infrastructure.Persistence.SeedData;
+using FoodBooking.Infrastructure.External.Routing;
+using FoodBooking.Application.Features.Payments.Services;
+using FoodBooking.Application.Features.Vouchers.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +43,8 @@ builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
 // Configure Cloudinary
 builder.Services.Configure<CloudinarySettings>(
@@ -54,7 +59,14 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+
+// Register OSRM Routing Service
+builder.Services.AddHttpClient<IRoutingService, OSRMRoutingService>();
+
+// Register Services
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
 
 // Register Seed Service
 builder.Services.AddScoped<LocationSeedService>();
@@ -198,6 +210,8 @@ app.MapImageEndpoints();
 app.MapLocationEndpoints();
 app.MapSeedEndpoints();
 app.MapOrderEndpoints();
+app.MapPaymentEndpoints();
+app.MapVoucherEndpoints();
 
 // Health check endpoint
 app.MapGet("/", () => "FoodBooking API is running!");

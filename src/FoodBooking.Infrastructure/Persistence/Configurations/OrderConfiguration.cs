@@ -53,18 +53,26 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasColumnName("customer_lng")
             .HasColumnType("double precision");
 
-        // Điểm xuất phát (shop)
+        // Điểm xuất phát (shop) - FPT University HCM
         builder.Property(o => o.ShopLat)
             .HasColumnName("shop_lat")
             .HasColumnType("double precision")
-            .HasDefaultValue(10.8506)
+            .HasDefaultValue(10.841449)
             .IsRequired();
 
         builder.Property(o => o.ShopLng)
             .HasColumnName("shop_lng")
             .HasColumnType("double precision")
-            .HasDefaultValue(106.7749)
+            .HasDefaultValue(106.809997)
             .IsRequired();
+
+        // Thời gian giao hàng dự kiến
+        builder.Property(o => o.EstimatedDeliveryMinutes)
+            .HasColumnName("estimated_delivery_minutes");
+
+        builder.Property(o => o.EstimatedDistanceMeters)
+            .HasColumnName("estimated_distance_meters")
+            .HasColumnType("double precision");
 
         // Shipper
         builder.Property(o => o.ShipperId)
@@ -82,9 +90,29 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasColumnName("total_price")
             .HasPrecision(12, 2);
 
+        builder.Property(o => o.VoucherDiscount)
+            .HasColumnName("voucher_discount")
+            .HasPrecision(12, 2);
+
+        builder.Property(o => o.FinalAmount)
+            .HasColumnName("final_amount")
+            .HasPrecision(12, 2);
+
         builder.Property(o => o.Note)
             .HasColumnName("note")
             .HasColumnType("text");
+
+        // Voucher
+        builder.Property(o => o.VoucherId)
+            .HasColumnName("voucher_id");
+
+        builder.Property(o => o.VoucherCode)
+            .HasColumnName("voucher_code")
+            .HasMaxLength(50);
+
+        // Payment
+        builder.Property(o => o.PaymentId)
+            .HasColumnName("payment_id");
 
         // Timestamps
         builder.Property(o => o.CreatedAt)
@@ -112,6 +140,16 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .WithMany()
             .HasForeignKey(o => o.WardCode)
             .HasPrincipalKey(w => w.Code)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne<Payment>()
+            .WithOne(p => p.Order)
+            .HasForeignKey<Order>(o => o.PaymentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne<Voucher>()
+            .WithMany()
+            .HasForeignKey(o => o.VoucherId)
             .OnDelete(DeleteBehavior.SetNull);
 
         // Indexes

@@ -1,3 +1,5 @@
+using FoodBooking.Domain.Enums;
+
 namespace FoodBooking.Application.Features.Orders.DTOs.Requests;
 
 public class CreateOrderRequest
@@ -5,8 +7,10 @@ public class CreateOrderRequest
     public CustomerInfo Customer { get; set; } = new();
     public DeliveryAddressInfo DeliveryAddress { get; set; } = new();
     public List<OrderItemRequest> Items { get; set; } = new();
-    public decimal TotalPrice { get; set; }
+    public decimal TotalPrice { get; set; } // Tổng tiền trước giảm giá
+    public string? VoucherCode { get; set; } // Mã voucher (optional)
     public string? Note { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; } // Default to COD if not specified
 }
 
 public class CustomerInfo

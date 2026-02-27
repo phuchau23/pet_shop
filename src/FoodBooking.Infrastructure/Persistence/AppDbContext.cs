@@ -28,6 +28,12 @@ public class AppDbContext : DbContext
     // Orders
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    
+    // Payments
+    public DbSet<Payment> Payments { get; set; }
+    
+    // Vouchers
+    public DbSet<Voucher> Vouchers { get; set; }
 
     // Phase B: Addresses, Vouchers, Payments
     // Phase C: Shippers, Shippings, Reviews
