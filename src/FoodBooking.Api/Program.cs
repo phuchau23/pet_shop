@@ -10,8 +10,10 @@ using FoodBooking.Application.Abstractions;
 using FoodBooking.Application.Features.Auth.Services;
 using FoodBooking.Infrastructure.External.Email;
 using FoodBooking.Infrastructure.External.Cloudinary;
+using FoodBooking.Infrastructure.External.Google;
 using FoodBooking.Infrastructure.Repositories;
 using FoodBooking.Api.Endpoints;
+using FoodBooking.Application.Abstractions.Auth;
 using FoodBooking.Application.Features.Auth.DTOs.Validators;
 using FoodBooking.Application.Features.Catalog.Services;
 using FoodBooking.Application.Features.Locations.Services;
@@ -51,6 +53,7 @@ builder.Services.Configure<CloudinarySettings>(
 // Register Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IImageService, CloudinaryImageService>();
+builder.Services.AddScoped<IGoogleTokenVerifier, GoogleTokenVerifier>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
