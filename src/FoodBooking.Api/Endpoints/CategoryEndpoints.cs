@@ -4,6 +4,7 @@ using FoodBooking.Application.Features.Catalog.DTOs.Requests;
 using FoodBooking.Application.Features.Catalog.DTOs.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FoodBooking.Api.Endpoints;
 
@@ -49,7 +50,7 @@ public static class CategoryEndpoints
         .Produces<ApiResponse<CategoryResponse>>(200)
         .Produces<ApiResponse<CategoryResponse>>(404);
 
-        group.MapPost("", async (
+        group.MapPost("", [Authorize] async (
             [FromBody] CreateCategoryRequest request,
             ICategoryService categoryService,
             CancellationToken cancellationToken) =>
@@ -73,7 +74,7 @@ public static class CategoryEndpoints
         .Produces<ApiResponse<CategoryResponse>>(201)
         .Produces<ApiResponse<CategoryResponse>>(400);
 
-        group.MapPut("/{id:int}", async (
+        group.MapPut("/{id:int}", [Authorize] async (
             int id,
             [FromBody] UpdateCategoryRequest request,
             ICategoryService categoryService,
@@ -102,7 +103,7 @@ public static class CategoryEndpoints
         .Produces<ApiResponse<CategoryResponse>>(404)
         .Produces<ApiResponse<CategoryResponse>>(400);
 
-        group.MapDelete("/{id:int}", async (
+        group.MapDelete("/{id:int}", [Authorize] async (
             int id,
             ICategoryService categoryService,
             CancellationToken cancellationToken) =>

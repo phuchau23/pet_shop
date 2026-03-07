@@ -24,14 +24,14 @@ services:
       dockerfile: Dockerfile
     container_name: foodbooking-api
     ports:
-      - "5000:8080"
-      - "5001:8081"
+      - "0.0.0.0:5000:8080"
+      - "0.0.0.0:5001:8081"
     environment:
       - AUTO_MIGRATE=true
       - AUTO_SEED_LOCATIONS=true
       - ENABLE_SWAGGER=true
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=foodbooking;Username=postgres;Password=postgres
     depends_on:
       postgres:

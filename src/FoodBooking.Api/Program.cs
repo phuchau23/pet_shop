@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using FoodBooking.Infrastructure.Persistence;
@@ -22,8 +24,16 @@ using FoodBooking.Infrastructure.Persistence.SeedData;
 using FoodBooking.Infrastructure.External.Routing;
 using FoodBooking.Application.Features.Payments.Services;
 using FoodBooking.Application.Features.Vouchers.Services;
+using FoodBooking.Api.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Kestrel to listen on all interfaces (0.0.0.0) for mobile device access
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080); // Listen on all interfaces
+});
 
 // Add services to the container
 builder.Services.AddOpenApi();
@@ -74,6 +84,72 @@ builder.Services.AddScoped<LocationSeedService>();
 // Configure ProblemDetails for better error responses
 builder.Services.AddProblemDetails();
 
+// Configure CORS
+// Note: WithOrigins() không hỗ trợ wildcard (*) cho port
+// Phải dùng SetIsOriginAllowed() để check dynamic
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFlutterWeb", policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            // Development: Allow all localhost ports (Flutter thay đổi port liên tục)
+            // SetIsOriginAllowed cho phép check origin động thay vì hardcode ports
+            policy.SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrEmpty(origin))
+                    return false;
+                
+                try
+                {
+                    var uri = new Uri(origin);
+                    var host = uri.Host.ToLower();
+                    
+                    // Allow localhost với bất kỳ port nào
+                    if (host == "localhost" || host == "127.0.0.1" || host == "::1")
+                        return true;
+                    
+                    // Allow local network IPs (để test trên mobile device)
+                    // 192.168.x.x, 10.x.x.x, 172.16.x.x - 172.31.x.x
+                    if (host.StartsWith("192.168.") || host.StartsWith("10."))
+                        return true;
+                    
+                    // Check 172.16.0.0 - 172.31.255.255 range
+                    if (host.StartsWith("172."))
+                    {
+                        var parts = host.Split('.');
+                        if (parts.Length >= 2 && int.TryParse(parts[1], out var secondOctet))
+                        {
+                            if (secondOctet >= 16 && secondOctet <= 31)
+                                return true;
+                        }
+                    }
+                    
+                    return false;
+                }
+                catch
+                {
+                    return false;
+                }
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        }
+        else
+        {
+            // Production: Only allow specific origins
+            policy.WithOrigins(
+                    "https://yourdomain.com",
+                    "https://www.yourdomain.com"
+                  )
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        }
+    });
+});
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo 
@@ -86,11 +162,12 @@ builder.Services.AddSwaggerGen(c =>
     // Add JWT Authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token, or just paste the token (will auto-add Bearer prefix)",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -116,6 +193,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+// Add SignalR
+builder.Services.AddSignalR();
+
 // Add JWT Authentication
 var jwtSecretKey = builder.Configuration["JwtSettings:SecretKey"] 
     ?? throw new InvalidOperationException("JWT SecretKey not configured");
@@ -135,7 +215,77 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "FoodBooking",
         ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? "FoodBooking",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+        // Map role claims correctly
+        RoleClaimType = ClaimTypes.Role,
+        NameClaimType = ClaimTypes.NameIdentifier
+    };
+    
+    // Xử lý token khi thiếu "Bearer" prefix hoặc lấy từ query string
+    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // SignalR: Lấy token từ query string (WebSocket không có header)
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+                return Task.CompletedTask;
+            }
+            
+            // REST API: Lấy token từ header
+            var token = context.Request.Headers["Authorization"].FirstOrDefault();
+            
+            // Nếu không có trong header, thử lấy từ query string
+            if (string.IsNullOrEmpty(token))
+            {
+                token = context.Request.Query["access_token"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                    return Task.CompletedTask;
+                }
+            }
+            else
+            {
+                // Nếu token không có "Bearer " prefix, tự động thêm vào
+                if (!token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Token = token;
+                }
+                else
+                {
+                    // Nếu đã có "Bearer ", extract token
+                    context.Token = token.Substring(7);
+                }
+            }
+            
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            // Đảm bảo role claim được thêm vào ClaimsPrincipal
+            var roleClaim = context.Principal?.FindFirst(ClaimTypes.Role);
+            if (roleClaim != null)
+            {
+                var identity = context.Principal?.Identity as System.Security.Claims.ClaimsIdentity;
+                if (identity != null && !identity.HasClaim(ClaimTypes.Role, roleClaim.Value))
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                }
+            }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            // Log lỗi để debug
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogError(context.Exception, "JWT Authentication failed");
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -198,8 +348,14 @@ if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ENABL
 
 app.UseHttpsRedirection();
 
+// Enable CORS (must be before UseAuthentication and UseAuthorization)
+app.UseCors("AllowFlutterWeb");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map SignalR Hub
+app.MapHub<LocationHub>("/hubs/location");
 
 // Map Endpoints
 app.MapAuthEndpoints();
