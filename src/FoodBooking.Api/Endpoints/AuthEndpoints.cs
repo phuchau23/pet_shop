@@ -184,5 +184,47 @@ public static class AuthEndpoints
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces<ApiResponse<ProfileResponse>>(StatusCodes.Status404NotFound)
         .Produces<ApiResponse<ProfileResponse>>(StatusCodes.Status400BadRequest);
+
+        // GET /auth/debug-claims - Debug: Xem tất cả claims trong token (Development only)
+        group.MapGet("/debug-claims", [Authorize] async (
+            ClaimsPrincipal user) =>
+        {
+            try
+            {
+                var claims = user.Claims.Select(c => new
+                {
+                    Type = c.Type,
+                    Value = c.Value
+                }).ToList();
+
+                var roles = user.Claims
+                    .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                    .Select(c => c.Value)
+                    .ToList();
+
+                return Results.Ok(new
+                {
+                    success = true,
+                    message = "Token claims retrieved successfully",
+                    data = new
+                    {
+                        allClaims = claims,
+                        roles = roles,
+                        isInRoleShipper = user.IsInRole("Shipper"),
+                        isInRoleAdmin = user.IsInRole("Admin"),
+                        isInRoleCustomer = user.IsInRole("Customer")
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(new { success = false, message = ex.Message });
+            }
+        })
+        .WithName("DebugClaims")
+        .WithSummary("Debug: View all claims in token (Development only)")
+        .WithDescription("View all claims in the JWT token to debug role issues")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized);
     }
 }

@@ -71,6 +71,18 @@ public class OrderRepository : IOrderRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<Order>> GetAvailableOrdersAsync(CancellationToken cancellationToken = default)
+    {
+        // Lấy các đơn hàng chưa có shipper nhận (status = pending hoặc confirmed, shipperId = null)
+        // Dùng !HasValue thay vì == null để EF Core translate đúng sang SQL
+        return await _context.Orders
+            .Include(o => o.OrderItems)
+            .Include(o => o.Payment)
+            .Where(o => (o.Status == "pending" || o.Status == "confirmed") && !o.ShipperId.HasValue)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Order> CreateAsync(Order order, CancellationToken cancellationToken = default)
     {
         _context.Orders.Add(order);

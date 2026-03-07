@@ -3,6 +3,7 @@ using FoodBooking.Application.Common;
 using FoodBooking.Application.Features.Vouchers.DTOs.Requests;
 using FoodBooking.Application.Features.Vouchers.DTOs.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FoodBooking.Api.Endpoints;
 
@@ -90,8 +91,8 @@ public static class VoucherEndpoints
         .Produces<ApiResponse<VoucherResponse>>(400)
         .Produces<ApiResponse<VoucherResponse>>(404);
 
-        // POST /vouchers - Tạo voucher mới (Admin only - có thể thêm authorization sau)
-        group.MapPost("", async (
+        // POST /vouchers - Tạo voucher mới
+        group.MapPost("", [Authorize] async (
             [FromBody] CreateVoucherRequest request,
             IVoucherService voucherService,
             CancellationToken cancellationToken) =>

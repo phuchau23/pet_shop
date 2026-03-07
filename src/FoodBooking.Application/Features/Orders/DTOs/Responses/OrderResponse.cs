@@ -16,6 +16,9 @@ public class OrderResponse
     public int? EstimatedDeliveryMinutes { get; set; }
     public double? EstimatedDistanceMeters { get; set; }
     public int? ShipperId { get; set; }
+    public double? ShipperCurrentLat { get; set; }
+    public double? ShipperCurrentLng { get; set; }
+    public DateTime? ShipperLocationUpdatedAt { get; set; }
     public string Status { get; set; } = string.Empty;
     public decimal? TotalPrice { get; set; } // Tổng tiền trước giảm giá
     public decimal? VoucherDiscount { get; set; } // Số tiền giảm từ voucher

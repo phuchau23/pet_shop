@@ -78,6 +78,18 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.ShipperId)
             .HasColumnName("shipper_id");
 
+        // Shipper location tracking
+        builder.Property(o => o.ShipperCurrentLat)
+            .HasColumnName("shipper_current_lat")
+            .HasColumnType("double precision");
+
+        builder.Property(o => o.ShipperCurrentLng)
+            .HasColumnName("shipper_current_lng")
+            .HasColumnType("double precision");
+
+        builder.Property(o => o.ShipperLocationUpdatedAt)
+            .HasColumnName("shipper_location_updated_at");
+
         // Trạng thái
         builder.Property(o => o.Status)
             .HasColumnName("status")
