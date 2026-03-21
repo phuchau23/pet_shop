@@ -26,6 +26,11 @@ public class Order
     // Shipper
     public int? ShipperId { get; set; }
     
+    // Shipper location tracking (realtime)
+    public double? ShipperCurrentLat { get; set; }
+    public double? ShipperCurrentLng { get; set; }
+    public DateTime? ShipperLocationUpdatedAt { get; set; }
+    
     // Trạng thái
     public string Status { get; set; } = "pending"; // pending | confirmed | shipping | delivered | cancelled
     

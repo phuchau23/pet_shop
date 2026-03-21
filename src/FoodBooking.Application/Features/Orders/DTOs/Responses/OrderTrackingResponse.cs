@@ -7,6 +7,15 @@ public class OrderTrackingResponse
     public string StatusDisplayName { get; set; } = string.Empty;
     public string? StatusDescription { get; set; }
     public int? ShipperId { get; set; }
+    
+    // Location data for map tracking
+    public double ShopLat { get; set; }
+    public double ShopLng { get; set; }
+    public double? CustomerLat { get; set; }
+    public double? CustomerLng { get; set; }
+    public double? ShipperCurrentLat { get; set; }
+    public double? ShipperCurrentLng { get; set; }
+    
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<StatusTimelineItem> Timeline { get; set; } = new();

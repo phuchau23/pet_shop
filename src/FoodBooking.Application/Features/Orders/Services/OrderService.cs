@@ -311,6 +311,18 @@ public class OrderService : IOrderService
         return orders.Select(MapToResponse);
     }
 
+    public async Task<IEnumerable<OrderResponse>> GetShipperOrdersAsync(int shipperId, string? status, CancellationToken cancellationToken = default)
+    {
+        var orders = await _orderRepository.GetByShipperIdAsync(shipperId, status, cancellationToken);
+        return orders.Select(MapToResponse);
+    }
+
+    public async Task<IEnumerable<OrderResponse>> GetAvailableOrdersAsync(CancellationToken cancellationToken = default)
+    {
+        var orders = await _orderRepository.GetAvailableOrdersAsync(cancellationToken);
+        return orders.Select(MapToResponse);
+    }
+
     public async Task<OrderResponse> UpdateStatusAsync(int id, UpdateOrderStatusRequest request, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(id, cancellationToken);
@@ -355,6 +367,27 @@ public class OrderService : IOrderService
         return BuildTrackingResponse(order);
     }
 
+    public async Task UpdateShipperLocationAsync(int orderId, int shipperId, double lat, double lng, CancellationToken cancellationToken = default)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken);
+        if (order == null)
+        {
+            throw new KeyNotFoundException($"Order with id {orderId} not found");
+        }
+
+        if (order.ShipperId != shipperId)
+        {
+            throw new UnauthorizedAccessException($"Shipper {shipperId} is not assigned to order {orderId}");
+        }
+
+        order.ShipperCurrentLat = lat;
+        order.ShipperCurrentLng = lng;
+        order.ShipperLocationUpdatedAt = DateTime.UtcNow;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        await _orderRepository.UpdateAsync(order, cancellationToken);
+    }
+
     public async Task<OrderResponse> UpdateShipperStatusAsync(int id, UpdateShipperStatusRequest request, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(id, cancellationToken);
@@ -366,9 +399,9 @@ public class OrderService : IOrderService
         // Validate status transition
         ValidateStatusTransition(order.Status, request.Status);
 
-        // Nếu shipper chấp nhận đơn (từ confirmed → shipping) và order chưa có shipperId
+        // Nếu shipper chấp nhận đơn (từ pending/confirmed → shipping) và order chưa có shipperId
         // thì tự động gán shipperId vào order
-        if (order.Status == "confirmed" && request.Status == "shipping")
+        if ((order.Status == "pending" || order.Status == "confirmed") && request.Status == "shipping")
         {
             if (order.ShipperId == null)
             {
@@ -380,13 +413,21 @@ public class OrderService : IOrderService
                 // Order đã được gán cho shipper khác
                 throw new UnauthorizedAccessException($"Order {id} has already been assigned to shipper {order.ShipperId}");
             }
+            
+            // Khi shipper nhận đơn, lưu vị trí ban đầu của shipper
+            if (request.Lat.HasValue && request.Lng.HasValue)
+            {
+                order.ShipperCurrentLat = request.Lat.Value;
+                order.ShipperCurrentLng = request.Lng.Value;
+                order.ShipperLocationUpdatedAt = DateTime.UtcNow;
+            }
         }
-        else
+        else if (request.Status == "delivered")
         {
-            // Với các status khác (shipping → delivered), phải validate shipperId
+            // Với status delivered, phải validate shipperId
             if (order.ShipperId == null)
             {
-                throw new InvalidOperationException($"Order {id} must have a shipper assigned before updating to status '{request.Status}'");
+                throw new InvalidOperationException($"Order {id} must have a shipper assigned before updating to status 'delivered'");
             }
             
             if (order.ShipperId != request.ShipperId)
@@ -405,6 +446,7 @@ public class OrderService : IOrderService
     private static void ValidateStatusTransition(string currentStatus, string newStatus)
     {
         // Valid transitions:
+        // pending → shipping (shipper nhận đơn trực tiếp) hoặc pending → confirmed → shipping
         // pending → confirmed → shipping → delivered
         // any → cancelled
 
@@ -415,7 +457,7 @@ public class OrderService : IOrderService
 
         var validTransitions = new Dictionary<string, List<string>>
         {
-            { "pending", new List<string> { "confirmed", "cancelled" } },
+            { "pending", new List<string> { "confirmed", "shipping", "cancelled" } }, // Cho phép pending → shipping (shipper nhận trực tiếp)
             { "confirmed", new List<string> { "shipping", "cancelled" } },
             { "shipping", new List<string> { "delivered", "cancelled" } },
             { "delivered", new List<string>() },
@@ -459,6 +501,9 @@ public class OrderService : IOrderService
             EstimatedDeliveryMinutes = order.EstimatedDeliveryMinutes,
             EstimatedDistanceMeters = order.EstimatedDistanceMeters,
             ShipperId = order.ShipperId,
+            ShipperCurrentLat = order.ShipperCurrentLat,
+            ShipperCurrentLng = order.ShipperCurrentLng,
+            ShipperLocationUpdatedAt = order.ShipperLocationUpdatedAt,
             Status = order.Status,
             TotalPrice = order.TotalPrice,
             VoucherDiscount = order.VoucherDiscount,
@@ -493,6 +538,13 @@ public class OrderService : IOrderService
             StatusDisplayName = statusInfo.DisplayName,
             StatusDescription = statusInfo.Description,
             ShipperId = order.ShipperId,
+            // Location data for map tracking
+            ShopLat = order.ShopLat,
+            ShopLng = order.ShopLng,
+            CustomerLat = order.CustomerLat,
+            CustomerLng = order.CustomerLng,
+            ShipperCurrentLat = order.ShipperCurrentLat,
+            ShipperCurrentLng = order.ShipperCurrentLng,
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt,
             Timeline = timeline
