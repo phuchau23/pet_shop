@@ -22,7 +22,9 @@ public class VnPayService : IVnPayService
         var payUrl = _configuration["VNPay:PayUrl"] ?? throw new InvalidOperationException("VNPay PayUrl not configured");
         var returnUrl = _configuration["VNPay:ReturnUrl"] ?? throw new InvalidOperationException("VNPay ReturnUrl not configured");
 
-        var createDate = DateTime.UtcNow;
+        // VNPay expects vnp_CreateDate/vnp_ExpireDate in Vietnam time (GMT+7) in the payload.
+        // Our server runtime is often UTC, so we convert to +7 to avoid "transaction expired" immediately.
+        var createDate = DateTime.UtcNow.AddHours(7);
         var expireDate = createDate.AddMinutes(15);
         var amountVnd = decimal.ToInt64(amount * 100);
 
