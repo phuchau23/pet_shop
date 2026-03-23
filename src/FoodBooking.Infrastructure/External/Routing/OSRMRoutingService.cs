@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FoodBooking.Application.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace FoodBooking.Infrastructure.External.Routing;
@@ -7,12 +8,14 @@ namespace FoodBooking.Infrastructure.External.Routing;
 public class OSRMRoutingService : IRoutingService
 {
     private readonly HttpClient _httpClient;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<OSRMRoutingService> _logger;
-    private const string OSRM_BASE_URL = "https://router.project-osrm.org/route/v1/driving";
+    private const string DefaultOsrmBaseUrl = "http://router.project-osrm.org/route/v1/driving";
 
-    public OSRMRoutingService(HttpClient httpClient, ILogger<OSRMRoutingService> logger)
+    public OSRMRoutingService(HttpClient httpClient, IConfiguration configuration, ILogger<OSRMRoutingService> logger)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -20,8 +23,9 @@ public class OSRMRoutingService : IRoutingService
     {
         try
         {
+            var baseUrl = _configuration["Routing:OsrmBaseUrl"] ?? DefaultOsrmBaseUrl;
             // Request với overview=full để lấy full geometry, geometries=geojson để lấy coordinates
-            var url = $"{OSRM_BASE_URL}/{fromLng},{fromLat};{toLng},{toLat}?overview=full&alternatives=false&steps=false&geometries=geojson";
+            var url = $"{baseUrl}/{fromLng},{fromLat};{toLng},{toLat}?overview=full&alternatives=false&steps=false&geometries=geojson";
             
             var response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();

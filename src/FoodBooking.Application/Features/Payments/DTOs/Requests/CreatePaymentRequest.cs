@@ -6,4 +6,5 @@ public class CreatePaymentRequest
 {
     public int OrderId { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
+    public string? ClientIpAddress { get; set; }
 }
