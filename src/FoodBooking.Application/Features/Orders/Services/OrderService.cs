@@ -487,7 +487,17 @@ public class OrderService : IOrderService
         decimal? deliveryFee = null;
         if (order.EstimatedDistanceMeters.HasValue && order.EstimatedDistanceMeters.Value > 0)
         {
-            deliveryFee = CalculateDeliveryFee(order.EstimatedDistanceMeters.Value, order.TotalPrice);
+            try
+            {
+                deliveryFee = CalculateDeliveryFee(order.EstimatedDistanceMeters.Value, order.TotalPrice);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Không để lỗi "vượt quá giới hạn km" làm gãy toàn bộ endpoint list đơn.
+                // Với response, chỉ trả deliveryFee = null (FE tự xử lý hiển thị).
+                _logger.LogWarning(ex, "Skip delivery fee calculation for order {OrderId} because distance is out of range. distanceMeters={DistanceMeters}", order.Id, order.EstimatedDistanceMeters);
+                deliveryFee = null;
+            }
         }
 
         // Lấy PaymentMethod từ Payment navigation property
