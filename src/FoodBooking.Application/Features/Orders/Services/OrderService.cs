@@ -7,6 +7,7 @@ using FoodBooking.Domain.Entities;
 using FoodBooking.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace FoodBooking.Application.Features.Orders.Services;
 
@@ -256,7 +257,8 @@ public class OrderService : IOrderService
                 var createPaymentRequest = new Application.Features.Payments.DTOs.Requests.CreatePaymentRequest
                 {
                     OrderId = createdOrder.Id,
-                    PaymentMethod = request.PaymentMethod.Value
+                    PaymentMethod = request.PaymentMethod.Value,
+                    ClientIpAddress = request.ClientIpAddress
                 };
                 
                 await _paymentService.CreatePaymentAsync(createPaymentRequest, cancellationToken);
@@ -274,11 +276,15 @@ public class OrderService : IOrderService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create payment for order {OrderId}", createdOrder.Id);
-                // Don't throw - order is created, payment can be created later
+                if (request.PaymentMethod == PaymentMethod.VNPay)
+                {
+                    throw new InvalidOperationException("Order created but failed to initialize VNPay payment. Please retry payment creation.", ex);
+                }
             }
         }
 
-        return MapToResponse(createdOrder);
+        var orderWithPayment = await _orderRepository.GetByIdWithItemsAsync(createdOrder.Id, cancellationToken);
+        return MapToResponse(orderWithPayment ?? createdOrder);
     }
 
     public async Task<OrderResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -486,6 +492,22 @@ public class OrderService : IOrderService
 
         // Lấy PaymentMethod từ Payment navigation property
         PaymentMethod? paymentMethod = order.Payment?.PaymentMethod;
+        string? paymentUrl = null;
+        if (!string.IsNullOrWhiteSpace(order.Payment?.PaymentMetadata))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(order.Payment.PaymentMetadata);
+                if (doc.RootElement.TryGetProperty("paymentUrl", out var paymentUrlElement))
+                {
+                    paymentUrl = paymentUrlElement.GetString();
+                }
+            }
+            catch
+            {
+                // Ignore metadata parse error and keep paymentUrl null.
+            }
+        }
 
         return new OrderResponse
         {
@@ -512,6 +534,10 @@ public class OrderService : IOrderService
             Note = order.Note,
             DeliveryFee = deliveryFee,
             PaymentMethod = paymentMethod,
+            PaymentStatus = order.Payment?.Status,
+            PaymentId = order.Payment?.Id,
+            TransactionRef = order.Payment?.TransactionRef,
+            PaymentUrl = paymentUrl,
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt,
             Items = order.OrderItems.Select(oi => new OrderItemResponse

@@ -11,6 +11,7 @@ public class CreateOrderRequest
     public string? VoucherCode { get; set; } // Mã voucher (optional)
     public string? Note { get; set; }
     public PaymentMethod? PaymentMethod { get; set; } // Default to COD if not specified
+    public string? ClientIpAddress { get; set; } // Set by API endpoint for VNPay
 }
 
 public class CustomerInfo

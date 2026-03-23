@@ -144,6 +144,16 @@ public class PaymentService : IPaymentService
             throw new KeyNotFoundException($"Payment not found for transaction {txnRef}");
         }
 
+        if (queryParams.TryGetValue("vnp_Amount", out var amountRaw) &&
+            long.TryParse(amountRaw, out var callbackAmount))
+        {
+            var expectedAmount = decimal.ToInt64(payment.Amount * 100);
+            if (callbackAmount != expectedAmount)
+            {
+                throw new InvalidOperationException("VNPay callback amount mismatch");
+            }
+        }
+
         if (payment.Status == PaymentStatus.Paid)
         {
             return new VnPayCallbackResponse
