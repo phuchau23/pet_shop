@@ -9,4 +9,5 @@ public interface IPaymentService
     Task<PaymentResponse> CreatePaymentAsync(CreatePaymentRequest request, CancellationToken cancellationToken = default);
     Task<PaymentResponse?> GetByOrderIdAsync(int orderId, CancellationToken cancellationToken = default);
     Task<PaymentResponse> UpdatePaymentStatusAsync(int paymentId, PaymentStatus status, CancellationToken cancellationToken = default);
+    Task<VnPayCallbackResponse> ProcessVnPayCallbackAsync(IDictionary<string, string> queryParams, CancellationToken cancellationToken = default);
 }

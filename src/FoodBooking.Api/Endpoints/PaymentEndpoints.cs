@@ -4,6 +4,7 @@ using FoodBooking.Application.Features.Payments.DTOs.Requests;
 using FoodBooking.Application.Features.Payments.DTOs.Responses;
 using FoodBooking.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace FoodBooking.Api.Endpoints;
 
@@ -18,11 +19,13 @@ public static class PaymentEndpoints
         // POST /payments - Tạo thanh toán
         group.MapPost("", async (
             [FromBody] CreatePaymentRequest request,
+            HttpContext httpContext,
             IPaymentService paymentService,
             CancellationToken cancellationToken) =>
         {
             try
             {
+                request.ClientIpAddress ??= httpContext.Connection.RemoteIpAddress?.ToString();
                 var result = await paymentService.CreatePaymentAsync(request, cancellationToken);
                 return Results.Created($"/api/payments/{result.Id}",
                     ApiResponse<PaymentResponse>.Success(result, "Payment created successfully"));
@@ -94,6 +97,65 @@ public static class PaymentEndpoints
         .Produces<ApiResponse<PaymentResponse>>(200)
         .Produces<ApiResponse<PaymentResponse>>(404)
         .Produces<ApiResponse<PaymentResponse>>(400);
+
+        group.MapGet("/vnpay/return", async (
+            HttpContext httpContext,
+            IPaymentService paymentService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var queryParams = httpContext.Request.Query
+                    .ToDictionary(k => k.Key, v => v.Value.ToString());
+                var result = await paymentService.ProcessVnPayCallbackAsync(queryParams, cancellationToken);
+                return Results.Ok(ApiResponse<object>.Success(result, result.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<object>.Error(404, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ApiResponse<object>.Error(400, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ApiResponse<object>.Error(400, ex.Message));
+            }
+        })
+        .WithName("VnPayReturn")
+        .WithSummary("VNPay return callback")
+        .Produces<ApiResponse<object>>(200)
+        .Produces<ApiResponse<object>>(400)
+        .Produces<ApiResponse<object>>(404);
+
+        group.MapGet("/vnpay/ipn", async (
+            HttpContext httpContext,
+            IPaymentService paymentService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var queryParams = httpContext.Request.Query
+                    .ToDictionary(k => k.Key, v => v.Value.ToString());
+                var result = await paymentService.ProcessVnPayCallbackAsync(queryParams, cancellationToken);
+                return Results.Ok(new
+                {
+                    RspCode = "00",
+                    Message = result.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new
+                {
+                    RspCode = "99",
+                    Message = ex.Message
+                });
+            }
+        })
+        .WithName("VnPayIpn")
+        .WithSummary("VNPay IPN callback");
 
     }
 }

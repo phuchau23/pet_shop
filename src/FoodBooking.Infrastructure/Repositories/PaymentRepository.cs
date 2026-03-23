@@ -28,6 +28,13 @@ public class PaymentRepository : IPaymentRepository
             .FirstOrDefaultAsync(p => p.OrderId == orderId, cancellationToken);
     }
 
+    public async Task<Payment?> GetByTransactionRefAsync(string transactionRef, CancellationToken cancellationToken = default)
+    {
+        return await _context.Payments
+            .Include(p => p.Order)
+            .FirstOrDefaultAsync(p => p.TransactionRef == transactionRef, cancellationToken);
+    }
+
     public async Task<Payment> CreateAsync(Payment payment, CancellationToken cancellationToken = default)
     {
         _context.Payments.Add(payment);

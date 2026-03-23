@@ -26,14 +26,19 @@ using FoodBooking.Application.Features.Payments.Services;
 using FoodBooking.Application.Features.Vouchers.Services;
 using FoodBooking.Api.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using FoodBooking.Infrastructure.External.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel to listen on all interfaces (0.0.0.0) for mobile device access
-builder.WebHost.ConfigureKestrel(options =>
+// Development: dùng applicationUrl trong launchSettings.json (https://localhost:7248 + http://5054).
+// Production/Docker: listen 0.0.0.0:8080 để Railway/container hoạt động.
+if (!builder.Environment.IsDevelopment())
 {
-    options.ListenAnyIP(8080); // Listen on all interfaces
-});
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenAnyIP(8080);
+    });
+}
 
 // Add services to the container
 builder.Services.AddOpenApi();
@@ -76,10 +81,12 @@ builder.Services.AddHttpClient<IRoutingService, OSRMRoutingService>();
 // Register Services
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 
 // Register Seed Service
 builder.Services.AddScoped<LocationSeedService>();
+builder.Services.AddScoped<AdminSeedService>();
 
 // Configure ProblemDetails for better error responses
 builder.Services.AddProblemDetails();
@@ -325,6 +332,10 @@ if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("AUTO_
             var seedService = scope.ServiceProvider.GetRequiredService<LocationSeedService>();
             await seedService.SeedLocationsAsync();
         }
+
+        // Auto-seed admin account if no admin exists
+        var adminSeedService = scope.ServiceProvider.GetRequiredService<AdminSeedService>();
+        await adminSeedService.SeedAdminAsync();
     }
     catch (Exception ex)
     {
