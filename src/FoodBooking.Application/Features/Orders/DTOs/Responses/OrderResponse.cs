@@ -27,6 +27,10 @@ public class OrderResponse
     public string? Note { get; set; }
     public decimal? DeliveryFee { get; set; }
     public PaymentMethod? PaymentMethod { get; set; }
+    public PaymentStatus? PaymentStatus { get; set; }
+    public int? PaymentId { get; set; }
+    public string? TransactionRef { get; set; }
+    public string? PaymentUrl { get; set; } // VNPay payment URL for redirect
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<OrderItemResponse> Items { get; set; } = new();

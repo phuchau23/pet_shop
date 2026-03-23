@@ -43,11 +43,13 @@ public static class OrderEndpoints
         // POST /orders - Tạo đơn hàng mới
         group.MapPost("", async (
             [FromBody] CreateOrderRequest request,
+            HttpContext httpContext,
             IOrderService orderService,
             CancellationToken cancellationToken) =>
         {
             try
             {
+                request.ClientIpAddress ??= httpContext.Connection.RemoteIpAddress?.ToString();
                 var result = await orderService.CreateAsync(request, cancellationToken);
                 return Results.Created($"/api/orders/{result.Id}", 
                     ApiResponse<OrderResponse>.Success(result, "Order created successfully"));
