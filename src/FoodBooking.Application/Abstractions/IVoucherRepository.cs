@@ -9,5 +9,6 @@ public interface IVoucherRepository
     Task<IEnumerable<Voucher>> GetActiveVouchersAsync(CancellationToken cancellationToken = default);
     Task<Voucher> CreateAsync(Voucher voucher, CancellationToken cancellationToken = default);
     Task<Voucher> UpdateAsync(Voucher voucher, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Voucher voucher, CancellationToken cancellationToken = default);
     Task IncrementUsageCountAsync(int voucherId, CancellationToken cancellationToken = default);
 }

@@ -115,6 +115,92 @@ public static class VoucherEndpoints
         .WithName("CreateVoucher")
         .Produces<ApiResponse<VoucherResponse>>(201)
         .Produces<ApiResponse<VoucherResponse>>(400);
+
+        // PUT /vouchers/{id} - Cập nhật voucher
+        group.MapPut("/{id:int}", [Authorize(Roles = "Admin")] async (
+            int id,
+            [FromBody] UpdateVoucherRequest request,
+            IVoucherService voucherService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var voucher = await voucherService.UpdateAsync(id, request, cancellationToken);
+                return Results.Ok(ApiResponse<VoucherResponse>.Success(voucher, "Voucher updated successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<VoucherResponse>.Error(404, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ApiResponse<VoucherResponse>.Error(400, ex.Message));
+            }
+        })
+        .WithName("UpdateVoucher")
+        .Produces<ApiResponse<VoucherResponse>>(200)
+        .Produces<ApiResponse<VoucherResponse>>(404)
+        .Produces<ApiResponse<VoucherResponse>>(400);
+
+        // PUT /vouchers - Hỗ trợ format body có Id
+        group.MapPut("", [Authorize(Roles = "Admin")] async (
+            [FromBody] UpdateVoucherByBodyRequest request,
+            IVoucherService voucherService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var updateRequest = new UpdateVoucherRequest
+                {
+                    Code = request.Code,
+                    Name = request.Name,
+                    Description = request.Description,
+                    DiscountType = request.DiscountType,
+                    DiscountValue = request.DiscountValue,
+                    MinOrderAmount = request.MinOrderAmount,
+                    MaxDiscountAmount = request.MaxDiscountAmount,
+                    UsageLimit = request.UsageLimit,
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate,
+                    IsActive = request.IsActive
+                };
+
+                var voucher = await voucherService.UpdateAsync(request.Id, updateRequest, cancellationToken);
+                return Results.Ok(ApiResponse<VoucherResponse>.Success(voucher, "Voucher updated successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<VoucherResponse>.Error(404, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ApiResponse<VoucherResponse>.Error(400, ex.Message));
+            }
+        })
+        .WithName("UpdateVoucherByBody")
+        .Produces<ApiResponse<VoucherResponse>>(200)
+        .Produces<ApiResponse<VoucherResponse>>(404)
+        .Produces<ApiResponse<VoucherResponse>>(400);
+
+        // DELETE /vouchers/{id} - Xóa voucher
+        group.MapDelete("/{id:int}", [Authorize(Roles = "Admin")] async (
+            int id,
+            IVoucherService voucherService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                await voucherService.DeleteAsync(id, cancellationToken);
+                return Results.Ok(ApiResponse<object>.Success(null, "Voucher deleted successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<object>.Error(404, ex.Message));
+            }
+        })
+        .WithName("DeleteVoucher")
+        .Produces<ApiResponse<object>>(200)
+        .Produces<ApiResponse<object>>(404);
     }
 }
 
@@ -122,4 +208,20 @@ public class ValidateVoucherRequest
 {
     public string Code { get; set; } = string.Empty;
     public decimal OrderAmount { get; set; }
+}
+
+public class UpdateVoucherByBodyRequest
+{
+    public int Id { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public string DiscountType { get; set; } = "percentage";
+    public decimal DiscountValue { get; set; }
+    public decimal? MinOrderAmount { get; set; }
+    public decimal? MaxDiscountAmount { get; set; }
+    public int? UsageLimit { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public bool IsActive { get; set; } = true;
 }
