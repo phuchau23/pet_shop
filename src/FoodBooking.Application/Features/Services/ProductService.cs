@@ -137,10 +137,20 @@ public class ProductService : IProductService
 
     public async Task<ProductResponse> UpdateAsync(int id, UpdateProductRequest request, CancellationToken cancellationToken = default)
     {
-        var product = await _productRepository.GetByIdAsync(id, cancellationToken);
+        var product = await _productRepository.GetByIdWithDetailsAsync(id, cancellationToken);
         if (product == null)
         {
             throw new KeyNotFoundException($"Product with id {id} not found");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            throw new InvalidOperationException("Product name is required");
+        }
+
+        if (request.CategoryId <= 0 || request.BrandId <= 0)
+        {
+            throw new InvalidOperationException("CategoryId and BrandId must be greater than 0");
         }
 
         // Validate Category exists
@@ -186,6 +196,16 @@ public class ProductService : IProductService
         // Xử lý ProductSizes: nếu có ProductSizes mới, thay thế toàn bộ size cũ
         if (request.ProductSizes != null)
         {
+            var duplicateSizes = request.ProductSizes
+                .GroupBy(x => x.Size.Trim().ToLowerInvariant())
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+            if (duplicateSizes.Any())
+            {
+                throw new InvalidOperationException($"Duplicate product sizes are not allowed: {string.Join(", ", duplicateSizes)}");
+            }
+
             // Xóa size cũ
             product.ProductSizes.Clear();
             
@@ -205,6 +225,45 @@ public class ProductService : IProductService
         await _productRepository.UpdateAsync(product, cancellationToken);
         
         // Reload với ProductImages để trả về đầy đủ
+        var updatedProduct = await _productRepository.GetByIdWithDetailsAsync(product.ProductId, cancellationToken);
+        return MapToResponse(updatedProduct!);
+    }
+
+    public async Task<ProductResponse> AddImagesAsync(int id, IEnumerable<string> imageUrls, CancellationToken cancellationToken = default)
+    {
+        var product = await _productRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+        if (product == null)
+        {
+            throw new KeyNotFoundException($"Product with id {id} not found");
+        }
+
+        var validUrls = imageUrls
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (!validUrls.Any())
+        {
+            throw new InvalidOperationException("No valid image urls provided");
+        }
+
+        var hasPrimary = product.ProductImages.Any(x => x.IsPrimary);
+        var sortOrder = product.ProductImages.Any() ? product.ProductImages.Max(x => x.SortOrder) : 0;
+
+        foreach (var url in validUrls)
+        {
+            sortOrder++;
+            product.ProductImages.Add(new ProductImage
+            {
+                ImageUrl = url,
+                IsPrimary = !hasPrimary && sortOrder == 1,
+                SortOrder = sortOrder
+            });
+        }
+
+        product.UpdatedAt = DateTime.UtcNow;
+        await _productRepository.UpdateAsync(product, cancellationToken);
         var updatedProduct = await _productRepository.GetByIdWithDetailsAsync(product.ProductId, cancellationToken);
         return MapToResponse(updatedProduct!);
     }
