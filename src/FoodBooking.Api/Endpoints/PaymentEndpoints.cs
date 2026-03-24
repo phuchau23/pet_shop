@@ -44,6 +44,8 @@ public static class PaymentEndpoints
             }
         })
         .WithName("CreatePayment")
+        .WithSummary("Create payment for order")
+        .WithDescription("Create a payment record for an order. For VNPay, response contains payment URL metadata.")
         .Produces<ApiResponse<PaymentResponse>>(201)
         .Produces<ApiResponse<PaymentResponse>>(400)
         .Produces<ApiResponse<PaymentResponse>>(404);
@@ -69,6 +71,8 @@ public static class PaymentEndpoints
             }
         })
         .WithName("GetPaymentByOrderId")
+        .WithSummary("Get payment by order id")
+        .WithDescription("Retrieve payment information linked to a specific order id.")
         .Produces<ApiResponse<PaymentResponse>>(200)
         .Produces<ApiResponse<PaymentResponse>>(404);
 
@@ -94,6 +98,8 @@ public static class PaymentEndpoints
             }
         })
         .WithName("UpdatePaymentStatus")
+        .WithSummary("Update payment status")
+        .WithDescription("Update payment status manually by payment id.")
         .Produces<ApiResponse<PaymentResponse>>(200)
         .Produces<ApiResponse<PaymentResponse>>(404)
         .Produces<ApiResponse<PaymentResponse>>(400);
@@ -125,6 +131,7 @@ public static class PaymentEndpoints
         })
         .WithName("VnPayReturn")
         .WithSummary("VNPay return callback")
+        .WithDescription("Browser return URL called by VNPay after user finishes payment. Validates signature and updates payment/order status.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(400)
         .Produces<ApiResponse<object>>(404);
@@ -155,7 +162,8 @@ public static class PaymentEndpoints
             }
         })
         .WithName("VnPayIpn")
-        .WithSummary("VNPay IPN callback");
+        .WithSummary("VNPay IPN callback")
+        .WithDescription("Server-to-server callback from VNPay. Must be configured as IPN URL on VNPay portal.");
 
     }
 }

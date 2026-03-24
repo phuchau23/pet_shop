@@ -25,6 +25,8 @@ public static class ProductEndpoints
             return Results.Ok(ApiResponse<PaginatedResponse<ProductResponse>>.Success(result, "Products retrieved successfully"));
         })
         .WithName("GetAllProducts")
+        .WithSummary("Get paged products")
+        .WithDescription("Public endpoint to retrieve product list with pagination parameters.")
         .Produces<ApiResponse<PaginatedResponse<ProductResponse>>>(200);
 
         group.MapGet("/{id:int}", async (
@@ -47,6 +49,8 @@ public static class ProductEndpoints
             }
         })
         .WithName("GetProductById")
+        .WithSummary("Get product by id")
+        .WithDescription("Public endpoint to retrieve product detail by numeric id.")
         .Produces<ApiResponse<ProductResponse>>(200)
         .Produces<ApiResponse<ProductResponse>>(404);
 
@@ -60,6 +64,8 @@ public static class ProductEndpoints
             return Results.Ok(ApiResponse<PaginatedResponse<ProductResponse>>.Success(result, "Products retrieved successfully"));
         })
         .WithName("GetProductsByCategory")
+        .WithSummary("Get products by category")
+        .WithDescription("Public endpoint to retrieve paged products filtered by category id.")
         .Produces<ApiResponse<PaginatedResponse<ProductResponse>>>(200);
 
         group.MapGet("/brand/{brandId:int}", async (
@@ -72,6 +78,8 @@ public static class ProductEndpoints
             return Results.Ok(ApiResponse<PaginatedResponse<ProductResponse>>.Success(result, "Products retrieved successfully"));
         })
         .WithName("GetProductsByBrand")
+        .WithSummary("Get products by brand")
+        .WithDescription("Public endpoint to retrieve paged products filtered by brand id.")
         .Produces<ApiResponse<PaginatedResponse<ProductResponse>>>(200);
 
         group.MapPost("", [Authorize] async (
@@ -95,6 +103,8 @@ public static class ProductEndpoints
             }
         })
         .WithName("CreateProduct")
+        .WithSummary("Create a new product")
+        .WithDescription("Authorized endpoint to create a product. Category and brand must exist.")
         .Produces<ApiResponse<ProductResponse>>(201)
         .Produces<ApiResponse<ProductResponse>>(404)
         .Produces<ApiResponse<ProductResponse>>(400);
@@ -120,6 +130,8 @@ public static class ProductEndpoints
             }
         })
         .WithName("UpdateProduct")
+        .WithSummary("Update an existing product")
+        .WithDescription("Authorized endpoint to update a product by id.")
         .Produces<ApiResponse<ProductResponse>>(200)
         .Produces<ApiResponse<ProductResponse>>(404)
         .Produces<ApiResponse<ProductResponse>>(400);
@@ -144,6 +156,8 @@ public static class ProductEndpoints
             }
         })
         .WithName("DeleteProduct")
+        .WithSummary("Delete a product")
+        .WithDescription("Authorized endpoint to delete a product by id.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(404);
     }

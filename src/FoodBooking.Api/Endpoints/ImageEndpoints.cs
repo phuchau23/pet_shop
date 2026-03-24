@@ -66,6 +66,8 @@ public static class ImageEndpoints
             }
         })
         .WithName("UploadImage")
+        .WithSummary("Upload image file")
+        .WithDescription("Upload one image using multipart/form-data. Allowed extensions: .jpg, .jpeg, .png, .gif, .webp; max size 10MB.")
         .Accepts<IFormFile>("multipart/form-data")
         .Produces<ApiResponse<UploadImageResponse>>(200)
         .Produces<ApiResponse<UploadImageResponse>>(400)
@@ -91,6 +93,8 @@ public static class ImageEndpoints
             }
         })
         .WithName("DeleteImage")
+        .WithSummary("Delete image by public id")
+        .WithDescription("Delete a previously uploaded image using its Cloudinary public id.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(400);
     }

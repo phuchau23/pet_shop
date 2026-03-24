@@ -21,6 +21,8 @@ public static class CustomerEndpoints
             return Results.Ok(ApiResponse<IEnumerable<CustomerResponse>>.Success(result, "Customers retrieved successfully"));
         })
         .WithName("GetCustomers")
+        .WithSummary("Get all customers")
+        .WithDescription("Admin endpoint to list all users with Customer role.")
         .Produces<ApiResponse<IEnumerable<CustomerResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden);
@@ -36,6 +38,8 @@ public static class CustomerEndpoints
                 : Results.Ok(ApiResponse<CustomerResponse>.Success(result, "Customer retrieved successfully"));
         })
         .WithName("GetCustomerById")
+        .WithSummary("Get customer by id")
+        .WithDescription("Admin endpoint to retrieve customer profile by user id.")
         .Produces<ApiResponse<CustomerResponse>>(200)
         .Produces<ApiResponse<CustomerResponse>>(404);
 
@@ -55,6 +59,8 @@ public static class CustomerEndpoints
             }
         })
         .WithName("GetCustomerOrders")
+        .WithSummary("Get orders of a customer")
+        .WithDescription("Admin endpoint to retrieve all orders associated with the customer.")
         .Produces<ApiResponse<IEnumerable<CustomerOrderResponse>>>(200)
         .Produces<ApiResponse<IEnumerable<CustomerOrderResponse>>>(404);
 
@@ -69,6 +75,8 @@ public static class CustomerEndpoints
                 : Results.Ok(ApiResponse<CustomerSummaryResponse>.Success(result, "Customer summary retrieved successfully"));
         })
         .WithName("GetCustomerSummary")
+        .WithSummary("Get customer order summary")
+        .WithDescription("Admin endpoint to get aggregated customer metrics such as total orders and total spent.")
         .Produces<ApiResponse<CustomerSummaryResponse>>(200)
         .Produces<ApiResponse<CustomerSummaryResponse>>(404);
     }

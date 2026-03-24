@@ -31,6 +31,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("GetActiveVouchers")
+        .WithSummary("Get active vouchers")
+        .WithDescription("Public endpoint to list currently active vouchers that are valid by date and usage.")
         .Produces<ApiResponse<IEnumerable<VoucherResponse>>>(200);
 
         // GET /vouchers/{code} - Lấy voucher theo mã
@@ -54,6 +56,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("GetVoucherByCode")
+        .WithSummary("Get voucher by code")
+        .WithDescription("Public endpoint to retrieve voucher details by voucher code.")
         .Produces<ApiResponse<VoucherResponse>>(200)
         .Produces<ApiResponse<VoucherResponse>>(404);
 
@@ -87,6 +91,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("ValidateVoucher")
+        .WithSummary("Validate voucher for order amount")
+        .WithDescription("Validate voucher conditions against provided order amount and return voucher detail when valid.")
         .Produces<ApiResponse<VoucherResponse>>(200)
         .Produces<ApiResponse<VoucherResponse>>(400)
         .Produces<ApiResponse<VoucherResponse>>(404);
@@ -113,6 +119,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("CreateVoucher")
+        .WithSummary("Create voucher")
+        .WithDescription("Authorized endpoint to create a new voucher campaign.")
         .Produces<ApiResponse<VoucherResponse>>(201)
         .Produces<ApiResponse<VoucherResponse>>(400);
 
@@ -138,6 +146,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("UpdateVoucher")
+        .WithSummary("Update voucher by id")
+        .WithDescription("Admin endpoint to update voucher detail by path id.")
         .Produces<ApiResponse<VoucherResponse>>(200)
         .Produces<ApiResponse<VoucherResponse>>(404)
         .Produces<ApiResponse<VoucherResponse>>(400);
@@ -178,6 +188,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("UpdateVoucherByBody")
+        .WithSummary("Update voucher by id in body")
+        .WithDescription("Admin endpoint to update voucher detail using id in request body for client compatibility.")
         .Produces<ApiResponse<VoucherResponse>>(200)
         .Produces<ApiResponse<VoucherResponse>>(404)
         .Produces<ApiResponse<VoucherResponse>>(400);
@@ -199,6 +211,8 @@ public static class VoucherEndpoints
             }
         })
         .WithName("DeleteVoucher")
+        .WithSummary("Delete voucher by id")
+        .WithDescription("Admin endpoint to permanently delete a voucher.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(404);
     }

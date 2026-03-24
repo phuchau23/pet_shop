@@ -25,6 +25,8 @@ public static class CategoryEndpoints
             return Results.Ok(ApiResponse<PaginatedResponse<CategoryResponse>>.Success(result, "Categories retrieved successfully"));
         })
         .WithName("GetAllCategories")
+        .WithSummary("Get paged categories")
+        .WithDescription("Public endpoint to retrieve category list with pagination parameters.")
         .Produces<ApiResponse<PaginatedResponse<CategoryResponse>>>(200);
 
         group.MapGet("/{id:int}", async (
@@ -47,6 +49,8 @@ public static class CategoryEndpoints
             }
         })
         .WithName("GetCategoryById")
+        .WithSummary("Get category by id")
+        .WithDescription("Public endpoint to retrieve category detail by numeric id.")
         .Produces<ApiResponse<CategoryResponse>>(200)
         .Produces<ApiResponse<CategoryResponse>>(404);
 
@@ -71,6 +75,8 @@ public static class CategoryEndpoints
             }
         })
         .WithName("CreateCategory")
+        .WithSummary("Create a new category")
+        .WithDescription("Authorized endpoint to create a category. Request body must include category data.")
         .Produces<ApiResponse<CategoryResponse>>(201)
         .Produces<ApiResponse<CategoryResponse>>(400);
 
@@ -99,6 +105,8 @@ public static class CategoryEndpoints
             }
         })
         .WithName("UpdateCategory")
+        .WithSummary("Update an existing category")
+        .WithDescription("Authorized endpoint to update a category by id. Returns 404 when category does not exist.")
         .Produces<ApiResponse<CategoryResponse>>(200)
         .Produces<ApiResponse<CategoryResponse>>(404)
         .Produces<ApiResponse<CategoryResponse>>(400);
@@ -123,6 +131,8 @@ public static class CategoryEndpoints
             }
         })
         .WithName("DeleteCategory")
+        .WithSummary("Delete a category")
+        .WithDescription("Authorized endpoint to delete a category by id.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(404);
     }

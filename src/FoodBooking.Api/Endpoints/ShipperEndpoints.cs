@@ -23,6 +23,8 @@ public static class ShipperEndpoints
             return Results.Ok(ApiResponse<IEnumerable<ShipperResponse>>.Success(result, "Shippers retrieved successfully"));
         })
         .WithName("GetShippers")
+        .WithSummary("Get all shippers")
+        .WithDescription("Admin endpoint to list all users with Shipper role.")
         .Produces<ApiResponse<IEnumerable<ShipperResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden);
@@ -38,6 +40,8 @@ public static class ShipperEndpoints
                 : Results.Ok(ApiResponse<ShipperResponse>.Success(result, "Shipper retrieved successfully"));
         })
         .WithName("GetShipperById")
+        .WithSummary("Get shipper by id")
+        .WithDescription("Admin endpoint to retrieve shipper profile by user id.")
         .Produces<ApiResponse<ShipperResponse>>(200)
         .Produces<ApiResponse<ShipperResponse>>(404);
 
@@ -62,6 +66,8 @@ public static class ShipperEndpoints
             }
         })
         .WithName("UpdateShipperStatusManagement")
+        .WithSummary("Update shipper account status")
+        .WithDescription("Admin endpoint to update shipper account status: Active, Inactive, or Banned.")
         .Produces<ApiResponse<ShipperResponse>>(200)
         .Produces<ApiResponse<ShipperResponse>>(404)
         .Produces<ApiResponse<ShipperResponse>>(400);
@@ -83,6 +89,8 @@ public static class ShipperEndpoints
             }
         })
         .WithName("UpdateShipperAvailability")
+        .WithSummary("Update shipper availability")
+        .WithDescription("Admin endpoint to set shipper availability state for assignment.")
         .Produces<ApiResponse<ShipperResponse>>(200)
         .Produces<ApiResponse<ShipperResponse>>(404);
 
@@ -102,6 +110,8 @@ public static class ShipperEndpoints
             }
         })
         .WithName("GetShipperOrdersManagement")
+        .WithSummary("Get orders of a shipper")
+        .WithDescription("Admin endpoint to retrieve all orders assigned to a shipper.")
         .Produces<ApiResponse<IEnumerable<ShipperOrderResponse>>>(200)
         .Produces<ApiResponse<IEnumerable<ShipperOrderResponse>>>(404);
 
@@ -116,6 +126,8 @@ public static class ShipperEndpoints
                 : Results.Ok(ApiResponse<ShipperPerformanceResponse>.Success(result, "Shipper performance retrieved successfully"));
         })
         .WithName("GetShipperPerformance")
+        .WithSummary("Get shipper performance summary")
+        .WithDescription("Admin endpoint to retrieve aggregated shipper metrics like delivered count and success rate.")
         .Produces<ApiResponse<ShipperPerformanceResponse>>(200)
         .Produces<ApiResponse<ShipperPerformanceResponse>>(404);
     }

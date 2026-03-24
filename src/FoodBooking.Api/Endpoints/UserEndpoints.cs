@@ -23,6 +23,8 @@ public static class UserEndpoints
             return Results.Ok(ApiResponse<IEnumerable<UserResponse>>.Success(result, "Users retrieved successfully"));
         })
         .WithName("GetAllUsers")
+        .WithSummary("Get all users")
+        .WithDescription("Admin endpoint to list all user accounts.")
         .Produces<ApiResponse<IEnumerable<UserResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden);
@@ -38,6 +40,8 @@ public static class UserEndpoints
                 : Results.Ok(ApiResponse<UserResponse>.Success(result, "User retrieved successfully"));
         })
         .WithName("GetUserById")
+        .WithSummary("Get user by id")
+        .WithDescription("Authorized endpoint to get a user by numeric id.")
         .Produces<ApiResponse<UserResponse>>(200)
         .Produces<ApiResponse<UserResponse>>(404);
 
@@ -57,6 +61,8 @@ public static class UserEndpoints
             }
         })
         .WithName("CreateUser")
+        .WithSummary("Create user account")
+        .WithDescription("Admin endpoint to create a user and assign initial role.")
         .Produces<ApiResponse<UserResponse>>(201)
         .Produces<ApiResponse<UserResponse>>(400);
 
@@ -81,6 +87,8 @@ public static class UserEndpoints
             }
         })
         .WithName("UpdateUser")
+        .WithSummary("Update user profile")
+        .WithDescription("Admin endpoint to update user info such as email, full name, and phone number.")
         .Produces<ApiResponse<UserResponse>>(200)
         .Produces<ApiResponse<UserResponse>>(404)
         .Produces<ApiResponse<UserResponse>>(400);
@@ -106,6 +114,8 @@ public static class UserEndpoints
             }
         })
         .WithName("UpdateUserStatus")
+        .WithSummary("Update user account status")
+        .WithDescription("Admin endpoint to set user status: Active, Inactive, or Banned.")
         .Produces<ApiResponse<UserResponse>>(200)
         .Produces<ApiResponse<UserResponse>>(404)
         .Produces<ApiResponse<UserResponse>>(400);
@@ -118,6 +128,8 @@ public static class UserEndpoints
             return Results.Ok(ApiResponse<IEnumerable<RoleResponse>>.Success(result, "Roles retrieved successfully"));
         })
         .WithName("GetRoles")
+        .WithSummary("Get available roles")
+        .WithDescription("Authorized endpoint to list all supported user roles in the system.")
         .Produces<ApiResponse<IEnumerable<RoleResponse>>>(200);
 
         group.MapGet("/{id:int}/roles", [Authorize] async (
@@ -131,6 +143,8 @@ public static class UserEndpoints
                 : Results.Ok(ApiResponse<UserRolesResponse>.Success(result, "User roles retrieved successfully"));
         })
         .WithName("GetUserRoles")
+        .WithSummary("Get roles of a user")
+        .WithDescription("Authorized endpoint to retrieve the role set of a specific user.")
         .Produces<ApiResponse<UserRolesResponse>>(200)
         .Produces<ApiResponse<UserRolesResponse>>(404);
 
@@ -155,6 +169,8 @@ public static class UserEndpoints
             }
         })
         .WithName("UpdateUserRoles")
+        .WithSummary("Update roles of a user")
+        .WithDescription("Admin endpoint to update role assignment for a user.")
         .Produces<ApiResponse<UserRolesResponse>>(200)
         .Produces<ApiResponse<UserRolesResponse>>(404)
         .Produces<ApiResponse<UserRolesResponse>>(400);
