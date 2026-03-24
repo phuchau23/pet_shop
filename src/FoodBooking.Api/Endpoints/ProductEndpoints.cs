@@ -139,20 +139,14 @@ public static class ProductEndpoints
 
         group.MapPost("/{id:int}/images/upload", [Authorize] async (
             int id,
-            HttpRequest httpRequest,
+            [FromForm] UploadProductImagesRequest request,
             IImageService imageService,
             IProductService productService,
             CancellationToken cancellationToken) =>
         {
             try
             {
-                if (!httpRequest.HasFormContentType)
-                {
-                    return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "Request must be multipart/form-data"));
-                }
-
-                var form = await httpRequest.ReadFormAsync(cancellationToken);
-                var files = form.Files;
+                var files = request.Files;
                 if (files == null || files.Count == 0)
                 {
                     return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "No files uploaded"));
@@ -208,7 +202,7 @@ public static class ProductEndpoints
         .WithName("UploadProductImages")
         .WithSummary("Upload multiple images for a product")
         .WithDescription("Authorized endpoint to upload one or many images (multipart/form-data) and replace existing product images. Use field name 'files'.")
-        .Accepts<IFormFile>("multipart/form-data")
+        .Accepts<UploadProductImagesRequest>("multipart/form-data")
         .Produces<ApiResponse<ProductResponse>>(200)
         .Produces<ApiResponse<ProductResponse>>(404)
         .Produces<ApiResponse<ProductResponse>>(400)
@@ -250,4 +244,10 @@ public static class ProductEndpoints
 
         return current.Message;
     }
+}
+
+public class UploadProductImagesRequest
+{
+    [FromForm(Name = "files")]
+    public List<IFormFile> Files { get; set; } = new();
 }
