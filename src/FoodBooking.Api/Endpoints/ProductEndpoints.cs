@@ -207,7 +207,7 @@ public static class ProductEndpoints
         })
         .WithName("UploadProductImages")
         .WithSummary("Upload multiple images for a product")
-        .WithDescription("Authorized endpoint to upload one or many images (multipart/form-data) and append them to the product image list. Use field name 'files'.")
+        .WithDescription("Authorized endpoint to upload one or many images (multipart/form-data) and replace existing product images. Use field name 'files'.")
         .Accepts<IFormFile>("multipart/form-data")
         .Produces<ApiResponse<ProductResponse>>(200)
         .Produces<ApiResponse<ProductResponse>>(404)

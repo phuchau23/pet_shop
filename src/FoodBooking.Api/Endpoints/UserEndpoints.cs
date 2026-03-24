@@ -16,16 +16,25 @@ public static class UserEndpoints
             .WithOpenApi();
 
         group.MapGet("", [Authorize(Roles = "Admin")] async (
+            [FromQuery] string? status,
             IUserManagementService userService,
             CancellationToken cancellationToken) =>
         {
-            var result = await userService.GetAllUsersAsync(cancellationToken);
-            return Results.Ok(ApiResponse<IEnumerable<UserResponse>>.Success(result, "Users retrieved successfully"));
+            try
+            {
+                var result = await userService.GetAllUsersAsync(status, cancellationToken);
+                return Results.Ok(ApiResponse<IEnumerable<UserResponse>>.Success(result, "Users retrieved successfully"));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ApiResponse<IEnumerable<UserResponse>>.Error(400, ex.Message));
+            }
         })
         .WithName("GetAllUsers")
         .WithSummary("Get all users")
-        .WithDescription("Admin endpoint to list all user accounts.")
+        .WithDescription("Admin endpoint to list all user accounts. Optional query: status=Active|Inactive|Banned.")
         .Produces<ApiResponse<IEnumerable<UserResponse>>>(200)
+        .Produces<ApiResponse<IEnumerable<UserResponse>>>(400)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden);
 
@@ -89,6 +98,32 @@ public static class UserEndpoints
         .WithName("UpdateUser")
         .WithSummary("Update user profile")
         .WithDescription("Admin endpoint to update user info such as email, full name, and phone number.")
+        .Produces<ApiResponse<UserResponse>>(200)
+        .Produces<ApiResponse<UserResponse>>(404)
+        .Produces<ApiResponse<UserResponse>>(400);
+
+        group.MapDelete("/{id:int}", [Authorize(Roles = "Admin")] async (
+            int id,
+            IUserManagementService userService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                var result = await userService.DeleteUserAsync(id, cancellationToken);
+                return Results.Ok(ApiResponse<UserResponse>.Success(result, "User soft-deleted successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<UserResponse>.Error(404, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ApiResponse<UserResponse>.Error(400, ex.Message));
+            }
+        })
+        .WithName("DeleteUser")
+        .WithSummary("Soft delete user by id")
+        .WithDescription("Admin endpoint to soft-delete a user. Only Active users can be deleted; status is changed from Active to Inactive.")
         .Produces<ApiResponse<UserResponse>>(200)
         .Produces<ApiResponse<UserResponse>>(404)
         .Produces<ApiResponse<UserResponse>>(400);
