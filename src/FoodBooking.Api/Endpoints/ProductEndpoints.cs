@@ -139,26 +139,22 @@ public static class ProductEndpoints
 
         group.MapPost("/{id:int}/images/upload", [Authorize] async (
             int id,
-            [FromForm] UploadProductImagesRequest request,
+            IFormFileCollection files,
             IImageService imageService,
             IProductService productService,
             CancellationToken cancellationToken) =>
         {
             try
             {
-                var files = request.Files;
-                if (files == null || files.Count == 0)
-                {
-                    return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "No files uploaded"));
-                }
-
+                // IFormFileCollection is natively supported in Minimal API — no binding issues.
                 var validFiles = files
-                    .Where(f => f != null)
+                    .Where(f => f != null && f.Length > 0)
                     .ToList();
 
                 if (validFiles.Count == 0)
                 {
-                    return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "Uploaded files are invalid"));
+                    return Results.BadRequest(ApiResponse<ProductResponse>.Error(400,
+                        "No valid files uploaded. Please choose at least one file."));
                 }
 
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
@@ -167,20 +163,17 @@ public static class ProductEndpoints
 
                 foreach (var file in validFiles)
                 {
-                    if (file.Length == 0)
-                    {
-                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, $"File {file.FileName} is empty"));
-                    }
-
                     var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, $"Invalid file type for {file.FileName}. Allowed: {string.Join(", ", allowedExtensions)}"));
+                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400,
+                            $"Invalid file type '{fileExtension}' for {file.FileName}. Allowed: {string.Join(", ", allowedExtensions)}"));
                     }
 
                     if (file.Length > maxFileSize)
                     {
-                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, $"File {file.FileName} exceeds 10MB"));
+                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400,
+                            $"File {file.FileName} exceeds maximum size of 10MB"));
                     }
 
                     await using var stream = file.OpenReadStream();
@@ -189,7 +182,7 @@ public static class ProductEndpoints
                 }
 
                 var product = await productService.AddImagesAsync(id, uploadedUrls, cancellationToken);
-                return Results.Ok(ApiResponse<ProductResponse>.Success(product, "Product images uploaded successfully"));
+                return Results.Ok(ApiResponse<ProductResponse>.Success(product, $"Successfully uploaded {uploadedUrls.Count} image(s)"));
             }
             catch (KeyNotFoundException ex)
             {
@@ -210,8 +203,8 @@ public static class ProductEndpoints
         })
         .WithName("UploadProductImages")
         .WithSummary("Upload multiple images for a product")
-        .WithDescription("Authorized endpoint to upload one or many images (multipart/form-data) and replace existing product images. Use field name 'files'.")
-        .Accepts<UploadProductImagesRequest>("multipart/form-data")
+        .WithDescription("Upload 1 or more images via multipart/form-data. Field name: 'files'. Replaces all existing product images. Allowed: jpg, jpeg, png, gif, webp. Max 10MB each.")
+        .Accepts<IFormFileCollection>("multipart/form-data")
         .Produces<ApiResponse<ProductResponse>>(200)
         .Produces<ApiResponse<ProductResponse>>(404)
         .Produces<ApiResponse<ProductResponse>>(400)
@@ -253,10 +246,4 @@ public static class ProductEndpoints
 
         return current.Message;
     }
-}
-
-public class UploadProductImagesRequest
-{
-    [FromForm(Name = "files")]
-    public List<IFormFile> Files { get; set; } = new();
 }
