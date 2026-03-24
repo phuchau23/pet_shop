@@ -152,11 +152,20 @@ public static class ProductEndpoints
                     return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "No files uploaded"));
                 }
 
+                var validFiles = files
+                    .Where(f => f != null)
+                    .ToList();
+
+                if (validFiles.Count == 0)
+                {
+                    return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "Uploaded files are invalid"));
+                }
+
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                 const long maxFileSize = 10 * 1024 * 1024;
                 var uploadedUrls = new List<string>();
 
-                foreach (var file in files)
+                foreach (var file in validFiles)
                 {
                     if (file.Length == 0)
                     {
