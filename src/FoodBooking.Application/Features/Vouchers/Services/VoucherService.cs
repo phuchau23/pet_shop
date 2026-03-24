@@ -88,6 +88,42 @@ public class VoucherService : IVoucherService
         return MapToResponse(created);
     }
 
+    public async Task<VoucherResponse> UpdateAsync(int id, UpdateVoucherRequest request, CancellationToken cancellationToken = default)
+    {
+        var voucher = await _voucherRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Voucher with id {id} not found");
+
+        var existingByCode = await _voucherRepository.GetByCodeAsync(request.Code, cancellationToken);
+        if (existingByCode != null && existingByCode.Id != id)
+        {
+            throw new InvalidOperationException($"Voucher với mã {request.Code} đã tồn tại");
+        }
+
+        voucher.Code = request.Code;
+        voucher.Name = request.Name;
+        voucher.Description = request.Description;
+        voucher.DiscountType = request.DiscountType;
+        voucher.DiscountValue = request.DiscountValue;
+        voucher.MinOrderAmount = request.MinOrderAmount;
+        voucher.MaxDiscountAmount = request.MaxDiscountAmount;
+        voucher.UsageLimit = request.UsageLimit;
+        voucher.StartDate = request.StartDate;
+        voucher.EndDate = request.EndDate;
+        voucher.IsActive = request.IsActive;
+        voucher.UpdatedAt = DateTime.UtcNow;
+
+        var updated = await _voucherRepository.UpdateAsync(voucher, cancellationToken);
+        return MapToResponse(updated);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var voucher = await _voucherRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Voucher with id {id} not found");
+
+        await _voucherRepository.DeleteAsync(voucher, cancellationToken);
+    }
+
     public async Task<IEnumerable<VoucherResponse>> GetActiveVouchersAsync(CancellationToken cancellationToken = default)
     {
         var vouchers = await _voucherRepository.GetActiveVouchersAsync(cancellationToken);

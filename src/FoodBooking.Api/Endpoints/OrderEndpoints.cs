@@ -37,6 +37,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("EstimateDelivery")
+        .WithSummary("Estimate delivery time")
+        .WithDescription("Calculate estimated delivery distance, fee, and ETA from customer address to shop.")
         .Produces<ApiResponse<EstimateDeliveryResponse>>(200)
         .Produces<ApiResponse<EstimateDeliveryResponse>>(400);
 
@@ -60,6 +62,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("CreateOrder")
+        .WithSummary("Create new order")
+        .WithDescription("Create an order with items, address, and optional voucher/payment method. Returns payment info when applicable.")
         .Produces<ApiResponse<OrderResponse>>(201)
         .Produces<ApiResponse<OrderResponse>>(400);
 
@@ -84,6 +88,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("GetOrderById")
+        .WithSummary("Get order by id")
+        .WithDescription("Retrieve full order detail including items, address, delivery, and payment metadata.")
         .Produces<ApiResponse<OrderResponse>>(200)
         .Produces<ApiResponse<OrderResponse>>(404);
 
@@ -103,6 +109,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("GetAllOrders")
+        .WithSummary("Get all orders")
+        .WithDescription("Authorized endpoint to retrieve all orders for management dashboard.")
         .Produces<ApiResponse<IEnumerable<OrderResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden)
@@ -148,6 +156,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("GetMyOrders")
+        .WithSummary("Get current user orders")
+        .WithDescription("Authorized endpoint to get orders of the current logged-in user by profile phone number.")
         .Produces<ApiResponse<IEnumerable<OrderResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces<ApiResponse<IEnumerable<OrderResponse>>>(404)
@@ -179,6 +189,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("UpdateOrderStatus")
+        .WithSummary("Update order status")
+        .WithDescription("Authorized endpoint to update order status by id.")
         .Produces<ApiResponse<OrderResponse>>(200)
         .Produces<ApiResponse<OrderResponse>>(404)
         .Produces<ApiResponse<OrderResponse>>(400);
@@ -205,6 +217,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("AssignShipper")
+        .WithSummary("Assign shipper to order")
+        .WithDescription("Authorized endpoint to assign a shipper to a specific order.")
         .Produces<ApiResponse<OrderResponse>>(200)
         .Produces<ApiResponse<OrderResponse>>(404)
         .Produces<ApiResponse<OrderResponse>>(400);
@@ -230,6 +244,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("GetOrderTracking")
+        .WithSummary("Get order tracking info")
+        .WithDescription("Retrieve order tracking info including shipper location when available.")
         .Produces<ApiResponse<OrderTrackingResponse>>(200)
         .Produces<ApiResponse<OrderTrackingResponse>>(404)
         .Produces<ApiResponse<OrderTrackingResponse>>(400);
@@ -321,6 +337,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("UpdateShipperStatus")
+        .WithSummary("Shipper updates order status")
+        .WithDescription("Shipper endpoint to update assigned order status and optionally publish realtime updates.")
         .Produces<ApiResponse<OrderResponse>>(200)
         .Produces<ApiResponse<OrderResponse>>(404)
         .Produces(StatusCodes.Status401Unauthorized)
@@ -375,6 +393,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("UpdateShipperLocation")
+        .WithSummary("Shipper updates live location")
+        .WithDescription("Shipper endpoint to update current latitude/longitude for realtime order tracking.")
         .Produces<ApiResponse<object>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces<ApiResponse<object>>(404)
@@ -407,6 +427,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("GetShipperOrders")
+        .WithSummary("Get current shipper orders")
+        .WithDescription("Shipper endpoint to retrieve own assigned orders, optionally filtered by status query.")
         .Produces<ApiResponse<IEnumerable<OrderResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden)
@@ -428,6 +450,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("GetAvailableOrders")
+        .WithSummary("Get available orders for shippers")
+        .WithDescription("Shipper endpoint to list pending/confirmed orders that are not assigned yet.")
         .Produces<ApiResponse<IEnumerable<OrderResponse>>>(200)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden)
@@ -476,6 +500,8 @@ public static class OrderEndpoints
             }
         })
         .WithName("DebugAvailableRaw")
+        .WithSummary("Debug available order query")
+        .WithDescription("Debug endpoint to inspect raw available-order query result and count.")
         .Produces(200)
         .Produces(StatusCodes.Status401Unauthorized);
     }

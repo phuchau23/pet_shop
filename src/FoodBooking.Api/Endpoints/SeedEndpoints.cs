@@ -29,6 +29,8 @@ public static class SeedEndpoints
             }
         })
         .WithName("SeedLocations")
+        .WithSummary("Seed location master data")
+        .WithDescription("Run seeding for provinces/districts/wards from configured data source.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(400);
 

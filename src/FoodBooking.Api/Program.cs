@@ -18,12 +18,15 @@ using FoodBooking.Api.Endpoints;
 using FoodBooking.Application.Abstractions.Auth;
 using FoodBooking.Application.Features.Auth.DTOs.Validators;
 using FoodBooking.Application.Features.Catalog.Services;
+using FoodBooking.Application.Features.Customers.Services;
 using FoodBooking.Application.Features.Locations.Services;
 using FoodBooking.Application.Features.Orders.Services;
 using FoodBooking.Infrastructure.Persistence.SeedData;
 using FoodBooking.Infrastructure.External.Routing;
 using FoodBooking.Application.Features.Payments.Services;
 using FoodBooking.Application.Features.Vouchers.Services;
+using FoodBooking.Application.Features.Users.Services;
+using FoodBooking.Application.Features.Shippers.Services;
 using FoodBooking.Api.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using FoodBooking.Infrastructure.External.Payments;
@@ -83,6 +86,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<ICustomerManagementService, CustomerManagementService>();
+builder.Services.AddScoped<IShipperManagementService, ShipperManagementService>();
 
 // Register Seed Service
 builder.Services.AddScoped<LocationSeedService>();
@@ -379,6 +385,9 @@ app.MapSeedEndpoints();
 app.MapOrderEndpoints();
 app.MapPaymentEndpoints();
 app.MapVoucherEndpoints();
+app.MapUserEndpoints();
+app.MapCustomerEndpoints();
+app.MapShipperEndpoints();
 
 // Health check endpoint
 app.MapGet("/", () => "FoodBooking API is running!");

@@ -25,6 +25,8 @@ public static class BrandEndpoints
             return Results.Ok(ApiResponse<PaginatedResponse<BrandResponse>>.Success(result, "Brands retrieved successfully"));
         })
         .WithName("GetAllBrands")
+        .WithSummary("Get paged brands")
+        .WithDescription("Public endpoint to retrieve brand list with pagination parameters.")
         .Produces<ApiResponse<PaginatedResponse<BrandResponse>>>(200);
 
         group.MapGet("/{id:int}", async (
@@ -47,6 +49,8 @@ public static class BrandEndpoints
             }
         })
         .WithName("GetBrandById")
+        .WithSummary("Get brand by id")
+        .WithDescription("Public endpoint to retrieve brand detail by numeric id.")
         .Produces<ApiResponse<BrandResponse>>(200)
         .Produces<ApiResponse<BrandResponse>>(404);
 
@@ -71,6 +75,8 @@ public static class BrandEndpoints
             }
         })
         .WithName("CreateBrand")
+        .WithSummary("Create a new brand")
+        .WithDescription("Authorized endpoint to create a brand. Request body must include brand data.")
         .Produces<ApiResponse<BrandResponse>>(201)
         .Produces<ApiResponse<BrandResponse>>(400);
 
@@ -99,6 +105,8 @@ public static class BrandEndpoints
             }
         })
         .WithName("UpdateBrand")
+        .WithSummary("Update an existing brand")
+        .WithDescription("Authorized endpoint to update a brand by id. Returns 404 when brand does not exist.")
         .Produces<ApiResponse<BrandResponse>>(200)
         .Produces<ApiResponse<BrandResponse>>(404)
         .Produces<ApiResponse<BrandResponse>>(400);
@@ -123,6 +131,8 @@ public static class BrandEndpoints
             }
         })
         .WithName("DeleteBrand")
+        .WithSummary("Delete a brand")
+        .WithDescription("Authorized endpoint to delete a brand by id.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(404);
     }

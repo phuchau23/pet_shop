@@ -52,6 +52,12 @@ public class VoucherRepository : IVoucherRepository
         return voucher;
     }
 
+    public async Task DeleteAsync(Voucher voucher, CancellationToken cancellationToken = default)
+    {
+        _context.Vouchers.Remove(voucher);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task IncrementUsageCountAsync(int voucherId, CancellationToken cancellationToken = default)
     {
         var voucher = await _context.Vouchers.FindAsync(new object[] { voucherId }, cancellationToken);
