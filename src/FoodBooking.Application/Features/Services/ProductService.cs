@@ -248,8 +248,9 @@ public class ProductService : IProductService
             throw new InvalidOperationException("No valid image urls provided");
         }
 
-        var hasPrimary = product.ProductImages.Any(x => x.IsPrimary);
-        var sortOrder = product.ProductImages.Any() ? product.ProductImages.Max(x => x.SortOrder) : 0;
+        // Replace mode: when new images are uploaded, remove all existing images first.
+        product.ProductImages.Clear();
+        var sortOrder = 0;
 
         foreach (var url in validUrls)
         {
@@ -257,7 +258,7 @@ public class ProductService : IProductService
             product.ProductImages.Add(new ProductImage
             {
                 ImageUrl = url,
-                IsPrimary = !hasPrimary && sortOrder == 1,
+                IsPrimary = sortOrder == 1,
                 SortOrder = sortOrder
             });
         }

@@ -15,10 +15,22 @@ public class UserManagementService : IUserManagementService
         _userRepository = userRepository;
     }
 
-    public async Task<IEnumerable<UserResponse>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserResponse>> GetAllUsersAsync(string? status = null, CancellationToken cancellationToken = default)
     {
         var users = await _userRepository.GetAllAsync(cancellationToken);
-        return users.Select(MapToResponse);
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            return users.Select(MapToResponse);
+        }
+
+        if (!Enum.TryParse<AccountStatus>(status, true, out var parsedStatus))
+        {
+            throw new InvalidOperationException("Invalid status filter. Use Active, Inactive, or Banned");
+        }
+
+        return users
+            .Where(u => u.AccountStatus == parsedStatus)
+            .Select(MapToResponse);
     }
 
     public async Task<UserResponse?> GetUserByIdAsync(int userId, CancellationToken cancellationToken = default)
@@ -95,6 +107,22 @@ public class UserManagementService : IUserManagementService
         }
 
         user.AccountStatus = status;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        return MapToResponse(user);
+    }
+
+    public async Task<UserResponse> DeleteUserAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+            ?? throw new KeyNotFoundException($"User with id {userId} not found");
+
+        if (user.AccountStatus != AccountStatus.Active)
+        {
+            throw new InvalidOperationException("Only Active users can be deleted. Delete operation sets status from Active to Inactive");
+        }
+
+        user.AccountStatus = AccountStatus.Inactive;
         user.UpdatedAt = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user, cancellationToken);
         return MapToResponse(user);
