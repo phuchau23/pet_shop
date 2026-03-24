@@ -5,6 +5,7 @@ using FoodBooking.Application.Features.Catalog.DTOs.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace FoodBooking.Api.Endpoints;
 
@@ -45,7 +46,7 @@ public static class ProductEndpoints
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, ex.Message));
+                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, GetInnermostMessage(ex)));
             }
         })
         .WithName("GetProductById")
@@ -99,7 +100,7 @@ public static class ProductEndpoints
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, ex.Message));
+                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, GetInnermostMessage(ex)));
             }
         })
         .WithName("CreateProduct")
@@ -126,7 +127,7 @@ public static class ProductEndpoints
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, ex.Message));
+                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, GetInnermostMessage(ex)));
             }
         })
         .WithName("UpdateProduct")
@@ -135,6 +136,76 @@ public static class ProductEndpoints
         .Produces<ApiResponse<ProductResponse>>(200)
         .Produces<ApiResponse<ProductResponse>>(404)
         .Produces<ApiResponse<ProductResponse>>(400);
+
+        group.MapPost("/{id:int}/images/upload", [Authorize] async (
+            int id,
+            [FromForm] List<IFormFile> files,
+            IImageService imageService,
+            IProductService productService,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                if (files == null || files.Count == 0)
+                {
+                    return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, "No files uploaded"));
+                }
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                const long maxFileSize = 10 * 1024 * 1024;
+                var uploadedUrls = new List<string>();
+
+                foreach (var file in files)
+                {
+                    if (file.Length == 0)
+                    {
+                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, $"File {file.FileName} is empty"));
+                    }
+
+                    var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, $"Invalid file type for {file.FileName}. Allowed: {string.Join(", ", allowedExtensions)}"));
+                    }
+
+                    if (file.Length > maxFileSize)
+                    {
+                        return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, $"File {file.FileName} exceeds 10MB"));
+                    }
+
+                    await using var stream = file.OpenReadStream();
+                    var uploadResult = await imageService.UploadImageAsync(stream, file.FileName, cancellationToken);
+                    uploadedUrls.Add(uploadResult.ImageUrl);
+                }
+
+                var product = await productService.AddImagesAsync(id, uploadedUrls, cancellationToken);
+                return Results.Ok(ApiResponse<ProductResponse>.Success(product, "Product images uploaded successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Results.NotFound(ApiResponse<ProductResponse>.Error(404, ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, ex.Message));
+            }
+            catch (DbUpdateException ex)
+            {
+                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, GetInnermostMessage(ex)));
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ApiResponse<ProductResponse>.Error(400, GetInnermostMessage(ex)));
+            }
+        })
+        .WithName("UploadProductImages")
+        .WithSummary("Upload multiple images for a product")
+        .WithDescription("Authorized endpoint to upload one or many images (multipart/form-data) and append them to the product image list.")
+        .Accepts<List<IFormFile>>("multipart/form-data")
+        .Produces<ApiResponse<ProductResponse>>(200)
+        .Produces<ApiResponse<ProductResponse>>(404)
+        .Produces<ApiResponse<ProductResponse>>(400)
+        .DisableAntiforgery();
 
         group.MapDelete("/{id:int}", [Authorize] async (
             int id,
@@ -160,5 +231,16 @@ public static class ProductEndpoints
         .WithDescription("Authorized endpoint to delete a product by id.")
         .Produces<ApiResponse<object>>(200)
         .Produces<ApiResponse<object>>(404);
+    }
+
+    private static string GetInnermostMessage(Exception ex)
+    {
+        var current = ex;
+        while (current.InnerException != null)
+        {
+            current = current.InnerException;
+        }
+
+        return current.Message;
     }
 }
